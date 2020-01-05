@@ -24,6 +24,7 @@ const cmd = "obt"
 var (
 	showVersion bool
 	path        string
+	binaryName  string
 
 	version = "devel"
 )
@@ -31,6 +32,7 @@ var (
 func init() {
 	flag.BoolVar(&showVersion, "v", false, "print version number")
 	flag.StringVar(&path, "p", "", "install path")
+	flag.StringVar(&binaryName, "b", "", "binary name(default: repository name)")
 	flag.Usage = usage
 }
 
@@ -69,6 +71,10 @@ func run(args []string) int {
 	userName := a[len(a)-2]
 	repo := a[len(a)-1]
 
+	if len(binaryName) == 0 {
+		binaryName = repo
+	}
+
 	url, err := findDownloadURL(userName, repo)
 	if err != nil {
 		return msg(err)
@@ -97,19 +103,19 @@ func run(args []string) int {
 			return msg(err)
 		}
 
-		if hdr.Name == repo {
+		if hdr.Name == binaryName {
 			bs, err := ioutil.ReadAll(tr)
 			if err != nil {
 				return msg(err)
 			}
 
-			file := filepath.Join(strings.TrimSuffix(determinePath(), "\n"), repo)
+			file := filepath.Join(strings.TrimSuffix(determinePath(), "\n"), binaryName)
 			err = ioutil.WriteFile(file, bs, 0755)
 			if err != nil {
 				return msg(err)
 			}
 
-			fmt.Fprintf(os.Stdout, "Install '%s' to '%s'.\n", repo, file)
+			fmt.Fprintf(os.Stdout, "Install '%s' to '%s'.\n", binaryName, file)
 			return 0
 		}
 	}
@@ -139,7 +145,7 @@ func findDownloadURL(userName, repo string) (string, error) {
 	}
 
 	tag := strings.TrimPrefix(*release.TagName, "v")
-	target := repo + "_" + tag + "_" + runtime.GOOS + "_" + runtime.GOARCH + ".tar.gz"
+	target := binaryName + "_" + tag + "_" + runtime.GOOS + "_" + runtime.GOARCH + ".tar.gz"
 
 	for _, asset := range release.Assets {
 		if *asset.Name == target {
