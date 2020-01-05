@@ -1,0 +1,151 @@
+package main
+
+import (
+	"archive/tar"
+	"compress/gzip"
+	"context"
+	"errors"
+	"flag"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"strings"
+
+	"github.com/google/go-github/github"
+)
+
+const cmd = "obt"
+
+var (
+	showVersion bool
+	path        string
+
+	version = "devel"
+)
+
+func init() {
+	flag.BoolVar(&showVersion, "v", false, "print version number")
+	flag.StringVar(&path, "p", "", "install path")
+	flag.Usage = usage
+}
+
+func main() {
+	os.Exit(run(os.Args))
+}
+
+func usage() {
+	fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS] URL\n\n", cmd)
+	fmt.Fprintln(os.Stderr, "OPTIONS:")
+	flag.PrintDefaults()
+}
+
+func msg(err error) int {
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s: %v\n", cmd, err)
+		return 1
+	}
+	return 0
+}
+
+func run(args []string) int {
+	flag.Parse()
+
+	if showVersion {
+		fmt.Fprintf(os.Stdout, "%s %s (runtime: %s)\n", cmd, version, runtime.Version())
+		return 0
+	}
+
+	if len(flag.Args()) == 0 {
+		flag.Usage()
+		return 0
+	}
+
+	a := strings.Split(flag.Args()[0], "/")
+	userName := a[len(a)-2]
+	repo := a[len(a)-1]
+
+	url, err := findDownloadURL(userName, repo)
+	if err != nil {
+		return msg(err)
+	}
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return msg(err)
+	}
+
+	defer resp.Body.Close()
+
+	archive, err := gzip.NewReader(resp.Body)
+	if err != nil {
+		return msg(err)
+	}
+
+	tr := tar.NewReader(archive)
+
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return msg(err)
+		}
+
+		if hdr.Name == repo {
+			bs, err := ioutil.ReadAll(tr)
+			if err != nil {
+				return msg(err)
+			}
+
+			file := filepath.Join(strings.TrimSuffix(determinePath(), "\n"), repo)
+			err = ioutil.WriteFile(file, bs, 0755)
+			if err != nil {
+				return msg(err)
+			}
+
+			fmt.Fprintf(os.Stdout, "Install '%s' to '%s'.\n", repo, file)
+			return 0
+		}
+	}
+
+	return msg(errors.New("can't instal released binary"))
+}
+
+func determinePath() string {
+	if len(path) > 0 {
+		return path
+	}
+
+	gobin, err := exec.Command("go", "env", "GOBIN").Output()
+	if err == nil && len(gobin) > 0 {
+		return string(gobin)
+	}
+
+	// TODO: support windows
+	return "/usr/local/bin/"
+}
+
+func findDownloadURL(userName, repo string) (string, error) {
+	client := github.NewClient(nil)
+	release, _, err := client.Repositories.GetLatestRelease(context.Background(), userName, repo)
+	if err != nil {
+		return "", err
+	}
+
+	tag := strings.TrimPrefix(*release.TagName, "v")
+	target := repo + "_" + tag + "_" + runtime.GOOS + "_" + runtime.GOARCH + ".tar.gz"
+
+	for _, asset := range release.Assets {
+		if *asset.Name == target {
+			return *asset.BrowserDownloadURL, nil
+		}
+	}
+
+	return "", errors.New("can't find released binary")
+}
