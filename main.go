@@ -22,6 +22,7 @@ import (
 const cmd = "obt"
 
 var (
+	flags       *flag.FlagSet
 	showVersion bool
 	path        string
 	binaryName  string
@@ -30,10 +31,11 @@ var (
 )
 
 func init() {
-	flag.BoolVar(&showVersion, "v", false, "print version number")
-	flag.StringVar(&path, "p", "", "install path")
-	flag.StringVar(&binaryName, "b", "", "binary name(default: repository name)")
-	flag.Usage = usage
+	flags = flag.NewFlagSet(cmd, flag.ExitOnError)
+	flags.BoolVar(&showVersion, "v", false, "print version number")
+	flags.StringVar(&path, "p", "", "install path")
+	flags.StringVar(&binaryName, "b", "", "binary name(default: repository name)")
+	flags.Usage = usage
 }
 
 func main() {
@@ -43,7 +45,7 @@ func main() {
 func usage() {
 	fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS] URL\n\n", cmd)
 	fmt.Fprintln(os.Stderr, "OPTIONS:")
-	flag.PrintDefaults()
+	flags.PrintDefaults()
 }
 
 func msg(err error) int {
@@ -55,19 +57,19 @@ func msg(err error) int {
 }
 
 func run(args []string) int {
-	flag.Parse()
+	flags.Parse(args[1:])
 
 	if showVersion {
 		fmt.Fprintf(os.Stdout, "%s %s (runtime: %s)\n", cmd, version, runtime.Version())
 		return 0
 	}
 
-	if len(flag.Args()) == 0 {
-		flag.Usage()
+	if len(flags.Args()) == 0 {
+		flags.Usage()
 		return 0
 	}
 
-	a := strings.Split(flag.Args()[0], "/")
+	a := strings.Split(flags.Args()[0], "/")
 	userName := a[len(a)-2]
 	repo := a[len(a)-1]
 
