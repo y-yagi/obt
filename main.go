@@ -105,7 +105,7 @@ func run(args []string) int {
 			return msg(err)
 		}
 
-		if hdr.Name == binaryName {
+		if strings.HasSuffix(hdr.Name, binaryName) {
 			bs, err := ioutil.ReadAll(tr)
 			if err != nil {
 				return msg(err)
@@ -122,7 +122,7 @@ func run(args []string) int {
 		}
 	}
 
-	return msg(errors.New("can't instal released binary"))
+	return msg(errors.New("can't install released binary"))
 }
 
 func determinePath() string {
@@ -146,11 +146,9 @@ func findDownloadURL(userName, repo string) (string, error) {
 		return "", err
 	}
 
-	tag := strings.TrimPrefix(*release.TagName, "v")
-	target := binaryName + "_" + tag + "_" + runtime.GOOS + "_" + runtime.GOARCH + ".tar.gz"
-
+	suffix := runtime.GOOS + "_" + runtime.GOARCH + ".tar.gz"
 	for _, asset := range release.Assets {
-		if *asset.Name == target {
+		if strings.HasPrefix(*asset.Name, binaryName) && strings.HasSuffix(*asset.Name, suffix) {
 			return *asset.BrowserDownloadURL, nil
 		}
 	}
