@@ -146,14 +146,25 @@ func findDownloadURL(userName, repo string) (string, error) {
 		return "", err
 	}
 
-	suffix := runtime.GOOS + "_" + runtime.GOARCH + ".tar.gz"
 	for _, asset := range release.Assets {
-		name := strings.Replace(*asset.Name, "-", "_", -1)
-		name = strings.ToLower(name)
-		if strings.HasPrefix(name, binaryName) && strings.HasSuffix(name, suffix) {
+		if isAvailableBinary(asset) {
 			return *asset.BrowserDownloadURL, nil
 		}
 	}
 
 	return "", errors.New("can't find released binary")
+}
+
+func isAvailableBinary(asset github.ReleaseAsset) bool {
+	suffix := runtime.GOOS + "_" + runtime.GOARCH + ".tar.gz"
+
+	assetName := strings.Replace(*asset.Name, "-", "_", -1)
+	assetName = strings.ToLower(assetName)
+	if runtime.GOARCH == "amd64" {
+		assetName = strings.Replace(assetName, "x86_64", "amd64", -1)
+	} else if runtime.GOARCH == "386" {
+		assetName = strings.Replace(assetName, "x86", "386", -1)
+	}
+
+	return strings.HasPrefix(assetName, binaryName) && strings.HasSuffix(assetName, suffix)
 }
