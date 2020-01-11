@@ -149,6 +149,7 @@ func findDownloadURL(userName, repo string) (string, error) {
 	suffix := runtime.GOOS + "_" + runtime.GOARCH + ".tar.gz"
 	for _, asset := range release.Assets {
 		name := strings.Replace(*asset.Name, "-", "_", -1)
+		name = strings.ToLower(name)
 		if strings.HasPrefix(name, binaryName) && strings.HasSuffix(name, suffix) {
 			return *asset.BrowserDownloadURL, nil
 		}
