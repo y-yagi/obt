@@ -162,6 +162,7 @@ func isAvailableBinary(asset github.ReleaseAsset) bool {
 	assetName = strings.ToLower(assetName)
 	if runtime.GOARCH == "amd64" {
 		assetName = strings.Replace(assetName, "x86_64", "amd64", -1)
+		assetName = strings.Replace(assetName, "64bit", "amd64", -1)
 	} else if runtime.GOARCH == "386" {
 		assetName = strings.Replace(assetName, "x86", "386", -1)
 	}
