@@ -8,7 +8,8 @@ import (
 	"github.com/y-yagi/goext/osext"
 )
 
-func TestDownload(t *testing.T) {
+func TestDownloadTarGz(t *testing.T) {
+	setFlags()
 	tempDir, err := ioutil.TempDir("", "obttest")
 	if err != nil {
 		t.Fatal(err)
@@ -19,6 +20,22 @@ func TestDownload(t *testing.T) {
 	run([]string{"obt", "-p", "./", "https://github.com/y-yagi/jpcal"})
 
 	if !osext.IsExist("jpcal") {
+		t.Fatalf("file download failed")
+	}
+}
+
+func TestDownloadBinary(t *testing.T) {
+	setFlags()
+	tempDir, err := ioutil.TempDir("", "obttest")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	os.Chdir(tempDir)
+	run([]string{"obt", "-p", "./", "https://github.com/davecheney/httpstat"})
+
+	if !osext.IsExist("httpstat") {
 		t.Fatalf("file download failed")
 	}
 }
