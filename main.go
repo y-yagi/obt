@@ -30,16 +30,25 @@ var (
 	version = "devel"
 )
 
-func init() {
+type fileType int
+
+const (
+	unknown fileType = iota
+	binary
+	tarGz
+)
+
+func main() {
+	setFlags()
+	os.Exit(run(os.Args))
+}
+
+func setFlags() {
 	flags = flag.NewFlagSet(cmd, flag.ExitOnError)
 	flags.BoolVar(&showVersion, "v", false, "print version number")
 	flags.StringVar(&path, "p", "", "install path")
 	flags.StringVar(&binaryName, "b", "", "binary name(default: repository name)")
 	flags.Usage = usage
-}
-
-func main() {
-	os.Exit(run(os.Args))
 }
 
 func usage() {
@@ -77,52 +86,24 @@ func run(args []string) int {
 		binaryName = repo
 	}
 
-	url, err := findDownloadURL(userName, repo)
+	url, ft, err := findDownloadURL(userName, repo)
 	if err != nil {
 		return msg(err)
 	}
 
-	resp, err := http.Get(url)
+	file := filepath.Join(strings.TrimSuffix(determinePath(), "\n"), binaryName)
+	if ft == tarGz {
+		err = downloadTarGz(url, file)
+	} else {
+		err = downloadBinary(url, file)
+	}
+
 	if err != nil {
 		return msg(err)
 	}
 
-	defer resp.Body.Close()
-
-	archive, err := gzip.NewReader(resp.Body)
-	if err != nil {
-		return msg(err)
-	}
-
-	tr := tar.NewReader(archive)
-
-	for {
-		hdr, err := tr.Next()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return msg(err)
-		}
-
-		if strings.HasSuffix(hdr.Name, binaryName) {
-			bs, err := ioutil.ReadAll(tr)
-			if err != nil {
-				return msg(err)
-			}
-
-			file := filepath.Join(strings.TrimSuffix(determinePath(), "\n"), binaryName)
-			err = ioutil.WriteFile(file, bs, 0755)
-			if err != nil {
-				return msg(err)
-			}
-
-			fmt.Fprintf(os.Stdout, "Install '%s' to '%s'.\n", binaryName, file)
-			return 0
-		}
-	}
-
-	return msg(errors.New("can't install released binary. This is a possibility that bug of `obt`. Please report an issue"))
+	fmt.Fprintf(os.Stdout, "Install '%s' to '%s'.\n", binaryName, file)
+	return 0
 }
 
 func determinePath() string {
@@ -141,24 +122,27 @@ func determinePath() string {
 	return "/usr/local/bin/"
 }
 
-func findDownloadURL(userName, repo string) (string, error) {
+func findDownloadURL(userName, repo string) (string, fileType, error) {
 	client := github.NewClient(nil)
 	release, _, err := client.Repositories.GetLatestRelease(context.Background(), userName, repo)
 	if err != nil {
-		return "", err
+		return "", unknown, err
 	}
 
 	for _, asset := range release.Assets {
 		if isAvailableBinary(asset) {
-			return *asset.BrowserDownloadURL, nil
+			if strings.HasSuffix(*asset.Name, "tar.gz") {
+				return *asset.BrowserDownloadURL, tarGz, nil
+			}
+			return *asset.BrowserDownloadURL, binary, nil
 		}
 	}
 
-	return "", errors.New("can't find an available released binary")
+	return "", unknown, errors.New("can't find an available released binary")
 }
 
 func isAvailableBinary(asset github.ReleaseAsset) bool {
-	suffix := runtime.GOOS + "_" + runtime.GOARCH + ".tar.gz"
+	target := runtime.GOOS + "_" + runtime.GOARCH
 
 	assetName := strings.Replace(*asset.Name, "-", "_", -1)
 	assetName = strings.ToLower(assetName)
@@ -169,5 +153,66 @@ func isAvailableBinary(asset github.ReleaseAsset) bool {
 		assetName = strings.Replace(assetName, "x86", "386", -1)
 	}
 
-	return strings.HasPrefix(assetName, binaryName) && strings.HasSuffix(assetName, suffix)
+	return strings.HasPrefix(assetName, binaryName) && strings.Contains(assetName, target)
+}
+
+func downloadTarGz(url, file string) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil
+	}
+
+	defer resp.Body.Close()
+
+	archive, err := gzip.NewReader(resp.Body)
+	if err != nil {
+		return nil
+	}
+
+	tr := tar.NewReader(archive)
+
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil
+		}
+
+		if strings.HasSuffix(hdr.Name, binaryName) {
+			bs, err := ioutil.ReadAll(tr)
+			if err != nil {
+				return nil
+			}
+
+			err = ioutil.WriteFile(file, bs, 0755)
+			if err != nil {
+				return nil
+			}
+			return nil
+		}
+	}
+
+	return errors.New("can't install released binary. This is a possibility that bug of `obt`. Please report an issue")
+}
+
+func downloadBinary(url, file string) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	bs, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(file, bs, 0755)
+	if err != nil {
+		return err
+	}
+	return nil
 }
