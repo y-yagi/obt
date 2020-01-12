@@ -135,7 +135,9 @@ func determinePath() string {
 		return string(gobin)
 	}
 
-	// TODO: support windows
+	if runtime.GOOS == "windows" {
+		return "."
+	}
 	return "/usr/local/bin/"
 }
 
