@@ -122,7 +122,7 @@ func run(args []string) int {
 		}
 	}
 
-	return msg(errors.New("can't install released binary"))
+	return msg(errors.New("Can't install released binary. This is a possibility that bug of `obt`. Please report an issue."))
 }
 
 func determinePath() string {
@@ -152,7 +152,7 @@ func findDownloadURL(userName, repo string) (string, error) {
 		}
 	}
 
-	return "", errors.New("can't find released binary")
+	return "", errors.New("Can't find an available released binary")
 }
 
 func isAvailableBinary(asset github.ReleaseAsset) bool {
