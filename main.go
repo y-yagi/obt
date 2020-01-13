@@ -87,7 +87,7 @@ func run(args []string) int {
 	if len(defaultPath) > 0 {
 		cfg.Path = defaultPath
 		configure.Save(cmd, cfg)
-		fmt.Fprintf(os.Stdout, "set default install path\n")
+		fmt.Fprintf(os.Stdout, "Change default install path to '%s'\n", defaultPath)
 		return 0
 	}
 
