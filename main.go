@@ -11,7 +11,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -109,11 +108,6 @@ func run(args []string) int {
 func determinePath() string {
 	if len(path) > 0 {
 		return path
-	}
-
-	gobin, err := exec.Command("go", "env", "GOBIN").Output()
-	if err == nil && len(gobin) > 0 {
-		return string(gobin)
 	}
 
 	if runtime.GOOS == "windows" {
