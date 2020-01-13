@@ -75,6 +75,8 @@ func msg(err error) int {
 }
 
 func run(args []string) int {
+	configure.Load(cmd, &cfg)
+
 	flags.Parse(args[1:])
 
 	if showVersion {
@@ -88,8 +90,6 @@ func run(args []string) int {
 		fmt.Fprintf(os.Stdout, "set default install path\n")
 		return 0
 	}
-
-	configure.Load(cmd, &cfg)
 
 	if len(flags.Args()) == 0 {
 		flags.Usage()
