@@ -16,18 +16,26 @@ import (
 	"strings"
 
 	"github.com/google/go-github/github"
+	"github.com/y-yagi/configure"
 )
 
 const cmd = "obt"
 
 var (
+	cfg config
+
 	flags       *flag.FlagSet
 	showVersion bool
 	path        string
+	defaultPath string
 	binaryName  string
 
 	version = "devel"
 )
+
+type config struct {
+	Path string `toml:"path"`
+}
 
 type fileType int
 
@@ -46,12 +54,14 @@ func setFlags() {
 	flags = flag.NewFlagSet(cmd, flag.ExitOnError)
 	flags.BoolVar(&showVersion, "v", false, "print version number")
 	flags.StringVar(&path, "p", "", "install path")
+	flags.StringVar(&defaultPath, "s", "", "set default install path")
 	flags.StringVar(&binaryName, "b", "", "binary name(default: repository name)")
 	flags.Usage = usage
 }
 
 func usage() {
 	fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS] URL\n\n", cmd)
+	fmt.Fprintf(os.Stderr, "Install binary file from GitHub's release page. Default install path is '%s'.\n\n", determinePath())
 	fmt.Fprintln(os.Stderr, "OPTIONS:")
 	flags.PrintDefaults()
 }
@@ -71,6 +81,15 @@ func run(args []string) int {
 		fmt.Fprintf(os.Stdout, "%s %s (runtime: %s)\n", cmd, version, runtime.Version())
 		return 0
 	}
+
+	if len(defaultPath) > 0 {
+		cfg.Path = defaultPath
+		configure.Save(cmd, cfg)
+		fmt.Fprintf(os.Stdout, "set default install path\n")
+		return 0
+	}
+
+	configure.Load(cmd, &cfg)
 
 	if len(flags.Args()) == 0 {
 		flags.Usage()
@@ -113,6 +132,10 @@ func run(args []string) int {
 func determinePath() string {
 	if len(path) > 0 {
 		return path
+	}
+
+	if len(cfg.Path) > 0 {
+		return cfg.Path
 	}
 
 	if runtime.GOOS == "windows" {
