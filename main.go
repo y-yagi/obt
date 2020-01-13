@@ -90,7 +90,12 @@ func run(args []string) int {
 		return msg(err)
 	}
 
-	file := filepath.Join(strings.TrimSuffix(determinePath(), "\n"), binaryName)
+	path := determinePath()
+	if _, err := os.Stat(path); err != nil {
+		return msg(err)
+	}
+
+	file := filepath.Join(strings.TrimSuffix(path, "\n"), binaryName)
 	if ft == tarGz {
 		err = downloadTarGz(url, file)
 	} else {
