@@ -9,6 +9,8 @@ $ obt https://github.com/davecheney/httpstat
 Install 'httpstat' to '/home/y-yagi/.local/bin/httpstat'.
 $ obt -p /usr/local/bin https://github.com/rclone/rclone
 Install 'rclone' to '/usr/local/bin/rclone'.
+$ obt -b staticcheck https://github.com/dominikh/go-tools
+Install 'staticcheck' to '/home/y-yagi/.local/bin/staticcheck'.
 ```
 
 ## Usage
