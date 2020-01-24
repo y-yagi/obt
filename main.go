@@ -96,7 +96,8 @@ func run(args []string) int {
 		return 0
 	}
 
-	a := strings.Split(flags.Args()[0], "/")
+	url := strings.TrimSuffix(flags.Args()[0], "/")
+	a := strings.Split(url, "/")
 	userName := a[len(a)-2]
 	repo := a[len(a)-1]
 
