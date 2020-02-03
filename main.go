@@ -17,12 +17,14 @@ import (
 
 	"github.com/google/go-github/github"
 	"github.com/y-yagi/configure"
+	"github.com/y-yagi/debuglog"
 )
 
 const cmd = "obt"
 
 var (
-	cfg config
+	cfg    config
+	logger *debuglog.Logger
 
 	flags       *flag.FlagSet
 	showVersion bool
@@ -47,6 +49,7 @@ const (
 
 func main() {
 	setFlags()
+	logger = debuglog.New(os.Stdout)
 	os.Exit(run(os.Args))
 }
 
@@ -151,6 +154,8 @@ func findDownloadURL(userName, repo string) (string, fileType, error) {
 	if err != nil {
 		return "", unknown, err
 	}
+
+	logger.Printf("latest release version: %+v\n", *release.Name)
 
 	for _, asset := range release.Assets {
 		if isAvailableBinary(asset) {
