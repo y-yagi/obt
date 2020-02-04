@@ -49,7 +49,6 @@ const (
 
 func main() {
 	setFlags()
-	logger = debuglog.New(os.Stdout)
 	os.Exit(run(os.Args))
 }
 
@@ -78,6 +77,7 @@ func msg(err error) int {
 }
 
 func run(args []string) int {
+	logger = debuglog.New(os.Stdout)
 	configure.Load(cmd, &cfg)
 
 	flags.Parse(args[1:])
