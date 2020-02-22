@@ -57,7 +57,7 @@ func setFlags() {
 	flags.BoolVar(&showVersion, "v", false, "print version number")
 	flags.StringVar(&path, "p", "", "install path")
 	flags.StringVar(&defaultPath, "s", "", "set default install path")
-	flags.StringVar(&binaryName, "b", "", "binary name(default: repository name)")
+	flags.StringVar(&binaryName, "b", "", "binary name")
 	flags.Usage = usage
 }
 
@@ -103,10 +103,6 @@ func run(args []string) int {
 	a := strings.Split(url, "/")
 	userName := a[len(a)-2]
 	repo := a[len(a)-1]
-
-	if len(binaryName) == 0 {
-		binaryName = repo
-	}
 
 	url, ft, err := findDownloadURL(userName, repo)
 	if err != nil {
@@ -159,6 +155,15 @@ func findDownloadURL(userName, repo string) (string, fileType, error) {
 	logger.Printf("latest release version: %+v\n", *release.Name)
 
 	for _, asset := range release.Assets {
+		if len(binaryName) == 0 {
+			// TODO(y-yagi): Should I check all assets?
+			if a := strings.Split(*asset.Name, "_"); len(a) > 1 {
+				binaryName = a[0]
+			} else {
+				binaryName = repo
+			}
+		}
+
 		if isAvailableBinary(asset) {
 			if strings.HasSuffix(*asset.Name, "tar.gz") {
 				return *asset.BrowserDownloadURL, tarGz, nil
