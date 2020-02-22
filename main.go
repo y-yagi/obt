@@ -113,6 +113,7 @@ func run(args []string) int {
 		return msg(err)
 	}
 
+	logger.Printf("download file from '%+v'\n", url)
 	path := determinePath()
 	if _, err := os.Stat(path); err != nil {
 		return msg(err)
