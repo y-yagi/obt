@@ -172,6 +172,10 @@ func findDownloadURL(userName, repo string) (string, fileType, error) {
 }
 
 func isAvailableBinary(asset github.ReleaseAsset) bool {
+	if !isSupportedFormat(*asset.Name) {
+		return false
+	}
+
 	target := runtime.GOOS + "_" + runtime.GOARCH
 
 	assetName := strings.Replace(*asset.Name, "-", "_", -1)
@@ -245,4 +249,16 @@ func downloadBinary(url, file string) error {
 		return err
 	}
 	return nil
+}
+
+func isSupportedFormat(name string) bool {
+	// TODO(y-yagi): Support zip.
+	suffixes := []string{"deb", "rpm", "msi", "zip"}
+	for _, v := range suffixes {
+		if strings.HasSuffix(name, v) {
+			return false
+		}
+	}
+
+	return true
 }
