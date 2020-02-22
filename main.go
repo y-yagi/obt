@@ -166,7 +166,8 @@ func findDownloadURL(userName, repo string) (string, fileType, error) {
 		}
 	}
 
-	return "", unknown, errors.New("can't find an available released binary")
+	msg := fmt.Sprintf("can't find an available released binary. isn't the binary name '%s'?", binaryName)
+	return "", unknown, errors.New(msg)
 }
 
 func isAvailableBinary(asset github.ReleaseAsset) bool {
