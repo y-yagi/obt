@@ -1,21 +1,13 @@
 package main
 
 import (
-	"archive/tar"
-	"compress/gzip"
-	"context"
-	"errors"
 	"flag"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 
-	"github.com/google/go-github/github"
 	"github.com/y-yagi/configure"
 	"github.com/y-yagi/debuglog"
 )
@@ -42,8 +34,7 @@ type config struct {
 type fileType int
 
 const (
-	unknown fileType = iota
-	binary
+	binary fileType = iota
 	tarGz
 )
 
@@ -101,27 +92,21 @@ func run(args []string) int {
 
 	url := strings.TrimSuffix(flags.Args()[0], "/")
 	a := strings.Split(url, "/")
-	userName := a[len(a)-2]
-	repo := a[len(a)-1]
 
-	url, ft, err := findDownloadURL(userName, repo)
+	downloader := downloader{user: a[len(a)-2], repository: a[len(a)-1]}
+	err := downloader.findDownloadURL()
 	if err != nil {
 		return msg(err)
 	}
 
-	logger.Printf("download file from '%+v'\n", url)
+	logger.Printf("download file from '%+v'\n", downloader.url)
 	path := determinePath()
 	if _, err := os.Stat(path); err != nil {
 		return msg(err)
 	}
 
 	file := filepath.Join(strings.TrimSuffix(path, "\n"), binaryName)
-	if ft == tarGz {
-		err = downloadTarGz(url, file)
-	} else {
-		err = downloadBinary(url, file)
-	}
-
+	err = downloader.execute(file)
 	if err != nil {
 		return msg(err)
 	}
@@ -143,127 +128,4 @@ func determinePath() string {
 		return "."
 	}
 	return "/usr/local/bin/"
-}
-
-func findDownloadURL(userName, repo string) (string, fileType, error) {
-	client := github.NewClient(nil)
-	release, _, err := client.Repositories.GetLatestRelease(context.Background(), userName, repo)
-	if err != nil {
-		return "", unknown, err
-	}
-
-	logger.Printf("latest release version: %+v\n", *release.Name)
-
-	for _, asset := range release.Assets {
-		if len(binaryName) == 0 {
-			// TODO(y-yagi): Should I check all assets?
-			if a := strings.Split(*asset.Name, "_"); len(a) > 1 {
-				binaryName = a[0]
-			} else {
-				binaryName = repo
-			}
-		}
-
-		if isAvailableBinary(asset) {
-			if strings.HasSuffix(*asset.Name, "tar.gz") {
-				return *asset.BrowserDownloadURL, tarGz, nil
-			}
-			return *asset.BrowserDownloadURL, binary, nil
-		}
-	}
-
-	msg := fmt.Sprintf("can't find an available released binary. isn't the binary name '%s'?", binaryName)
-	return "", unknown, errors.New(msg)
-}
-
-func isAvailableBinary(asset github.ReleaseAsset) bool {
-	if !isSupportedFormat(*asset.Name) {
-		return false
-	}
-
-	target := runtime.GOOS + "_" + runtime.GOARCH
-
-	assetName := strings.Replace(*asset.Name, "-", "_", -1)
-	assetName = strings.ToLower(assetName)
-	if runtime.GOARCH == "amd64" {
-		assetName = strings.Replace(assetName, "x86_64", "amd64", -1)
-		assetName = strings.Replace(assetName, "64bit", "amd64", -1)
-	} else if runtime.GOARCH == "386" {
-		assetName = strings.Replace(assetName, "x86", "386", -1)
-	}
-
-	return strings.HasPrefix(assetName, binaryName) && strings.Contains(assetName, target)
-}
-
-func downloadTarGz(url, file string) error {
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil
-	}
-
-	defer resp.Body.Close()
-
-	archive, err := gzip.NewReader(resp.Body)
-	if err != nil {
-		return nil
-	}
-
-	tr := tar.NewReader(archive)
-
-	for {
-		hdr, err := tr.Next()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return nil
-		}
-
-		if strings.HasSuffix(hdr.Name, binaryName) {
-			bs, err := ioutil.ReadAll(tr)
-			if err != nil {
-				return nil
-			}
-
-			err = ioutil.WriteFile(file, bs, 0755)
-			if err != nil {
-				return nil
-			}
-			return nil
-		}
-	}
-
-	return errors.New("can't install released binary. This is a possibility that bug of `obt`. Please report an issue")
-}
-
-func downloadBinary(url, file string) error {
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	bs, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	err = ioutil.WriteFile(file, bs, 0755)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func isSupportedFormat(name string) bool {
-	// TODO(y-yagi): Support zip.
-	suffixes := []string{"deb", "rpm", "msi", "zip"}
-	for _, v := range suffixes {
-		if strings.HasSuffix(name, v) {
-			return false
-		}
-	}
-
-	return true
 }
