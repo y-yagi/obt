@@ -39,3 +39,9 @@ jobs:
         golangci-lint run --disable errcheck
       env:
         GO111MODULE: on
+
+    - name: Run test
+      run: |
+        go test -v main.go downloader.go downloader_test.go
+      env:
+        GO111MODULE: on
