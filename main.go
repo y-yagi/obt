@@ -31,13 +31,6 @@ type config struct {
 	Path string `toml:"path"`
 }
 
-type fileType int
-
-const (
-	binary fileType = iota
-	tarGz
-)
-
 func main() {
 	setFlags()
 	os.Exit(run(os.Args))

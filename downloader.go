@@ -15,6 +15,14 @@ import (
 	"github.com/google/go-github/github"
 )
 
+type fileType int
+
+const (
+	binary fileType = iota
+	tarGz
+	zip
+)
+
 type downloader struct {
 	user       string
 	repository string
@@ -45,6 +53,8 @@ func (d *downloader) findDownloadURL() error {
 			d.url = *asset.BrowserDownloadURL
 			if strings.HasSuffix(*asset.Name, "tar.gz") {
 				d.fType = tarGz
+			} else if strings.HasSuffix(*asset.Name, "zip") {
+				d.fType = zip
 			} else {
 				d.fType = binary
 			}
@@ -76,22 +86,25 @@ func (d *downloader) isAvailableBinary(asset github.ReleaseAsset) bool {
 }
 
 func (d *downloader) execute(file string) error {
-	if d.fType == tarGz {
-		return d.downloadTarGz(file)
-	}
-
-	return d.downloadBinary(file)
-}
-
-func (d *downloader) downloadTarGz(file string) error {
 	resp, err := http.Get(d.url)
 	if err != nil {
-		return nil
+		return err
 	}
-
 	defer resp.Body.Close()
 
-	archive, err := gzip.NewReader(resp.Body)
+	if d.fType == tarGz {
+		return d.downloadTarGz(&resp.Body, file)
+	}
+
+	if d.fType == zip {
+		return d.downloadZip(&resp.Body, file)
+	}
+
+	return d.downloadBinary(&resp.Body, file)
+}
+
+func (d *downloader) downloadTarGz(body *io.ReadCloser, file string) error {
+	archive, err := gzip.NewReader(*body)
 	if err != nil {
 		return nil
 	}
@@ -124,15 +137,26 @@ func (d *downloader) downloadTarGz(file string) error {
 	return errors.New("can't install released binary. This is a possibility that bug of `obt`. Please report an issue")
 }
 
-func (d *downloader) downloadBinary(file string) error {
-	resp, err := http.Get(d.url)
+func (d *downloader) downloadZip(body *io.ReadCloser, file string) error {
+	r, err := gzip.NewReader(*body)
+	if err != nil {
+		return nil
+	}
+
+	bs, err := ioutil.ReadAll(r)
 	if err != nil {
 		return err
 	}
 
-	defer resp.Body.Close()
+	err = ioutil.WriteFile(file, bs, 0755)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
-	bs, err := ioutil.ReadAll(resp.Body)
+func (d *downloader) downloadBinary(body *io.ReadCloser, file string) error {
+	bs, err := ioutil.ReadAll(*body)
 	if err != nil {
 		return err
 	}
@@ -145,8 +169,7 @@ func (d *downloader) downloadBinary(file string) error {
 }
 
 func (d *downloader) isSupportedFormat(name string) bool {
-	// TODO(y-yagi): Support zip.
-	suffixes := []string{"deb", "rpm", "msi", "zip"}
+	suffixes := []string{"deb", "rpm", "msi"}
 	for _, v := range suffixes {
 		if strings.HasSuffix(name, v) {
 			return false
