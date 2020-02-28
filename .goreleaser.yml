@@ -17,6 +17,13 @@ checksum:
   name_template: 'checksums.txt'
 snapshot:
   name_template: "{{ .Tag }}-next"
+snapcrafts:
+  -
+    publish: true
+    summary: obt is a downloader for the GitHub release page.
+    description: obt is a downloader for the GitHub release page.
+    license: MIT
+    base: core18
 changelog:
   sort: asc
   filters:
