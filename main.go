@@ -67,7 +67,7 @@ func run(args []string) int {
 	flags.Parse(args[1:])
 
 	if showVersion {
-		fmt.Fprintf(os.Stdout, "%s %s (runtime: %s)\n", cmd, version, runtime.Version())
+		fmt.Fprintf(os.Stdout, "%s %s\n", cmd, version)
 		return 0
 	}
 
