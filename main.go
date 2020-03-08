@@ -86,6 +86,11 @@ func run(args []string) int {
 	url := strings.TrimSuffix(flags.Args()[0], "/")
 	a := strings.Split(url, "/")
 
+	if len(a) != 2 {
+		flags.Usage()
+		return 0
+	}
+
 	downloader := downloader{user: a[len(a)-2], repository: a[len(a)-1]}
 	err := downloader.findDownloadURL()
 	if err != nil {
