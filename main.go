@@ -86,7 +86,7 @@ func run(args []string) int {
 	url := strings.TrimSuffix(flags.Args()[0], "/")
 	a := strings.Split(url, "/")
 
-	if len(a) != 2 {
+	if len(a) < 2 {
 		flags.Usage()
 		return 0
 	}
