@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -73,4 +74,26 @@ func TestDownloader_Zip(t *testing.T) {
 	if string(buf) != want {
 		t.Fatalf("expected '%s', but got '%s'\n", want, buf)
 	}
+}
+
+func TestIsAvailableBinary(t *testing.T) {
+	osAndArch := runtime.GOOS + "_" + runtime.GOARCH
+
+	var tests = []struct {
+		in   string
+		want bool
+	}{
+		{"golangci-lint-1.23.8-" + osAndArch + ".tar.gz", true},
+		{"golangci-lint-1.23.8-" + osAndArch + ".deb", false},
+		{"golangci-lint-1.23.8-" + osAndArch + ".zip", true},
+	}
+
+	d := downloader{}
+	for _, tt := range tests {
+		got := d.isAvailableBinary(tt.in)
+		if tt.want != got {
+			t.Fatalf("in: '%v', expected: %v, got: %v", tt.in, tt.want, got)
+		}
+	}
+
 }

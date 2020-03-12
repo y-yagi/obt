@@ -49,7 +49,7 @@ func (d *downloader) findDownloadURL() error {
 			}
 		}
 
-		if d.isAvailableBinary(asset) {
+		if d.isAvailableBinary(*asset.Name) {
 			d.url = *asset.BrowserDownloadURL
 			if strings.HasSuffix(*asset.Name, "tar.gz") {
 				d.fType = tarGz
@@ -66,14 +66,14 @@ func (d *downloader) findDownloadURL() error {
 	return errors.New(msg)
 }
 
-func (d *downloader) isAvailableBinary(asset github.ReleaseAsset) bool {
-	if !d.isSupportedFormat(*asset.Name) {
+func (d *downloader) isAvailableBinary(assetName string) bool {
+	if !d.isSupportedFormat(assetName) {
 		return false
 	}
 
 	osAndArch := runtime.GOOS + "_" + runtime.GOARCH
 
-	assetName := strings.Replace(*asset.Name, "-", "_", -1)
+	assetName = strings.Replace(assetName, "-", "_", -1)
 	prefix := strings.Replace(binaryName, "-", "_", -1)
 	assetName = strings.ToLower(assetName)
 	if runtime.GOARCH == "amd64" {
