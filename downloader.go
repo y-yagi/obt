@@ -71,9 +71,10 @@ func (d *downloader) isAvailableBinary(asset github.ReleaseAsset) bool {
 		return false
 	}
 
-	target := runtime.GOOS + "_" + runtime.GOARCH
+	osAndArch := runtime.GOOS + "_" + runtime.GOARCH
 
 	assetName := strings.Replace(*asset.Name, "-", "_", -1)
+	prefix := strings.Replace(binaryName, "-", "_", -1)
 	assetName = strings.ToLower(assetName)
 	if runtime.GOARCH == "amd64" {
 		assetName = strings.Replace(assetName, "x86_64", "amd64", -1)
@@ -82,7 +83,7 @@ func (d *downloader) isAvailableBinary(asset github.ReleaseAsset) bool {
 		assetName = strings.Replace(assetName, "x86", "386", -1)
 	}
 
-	return strings.HasPrefix(assetName, binaryName) && strings.Contains(assetName, target)
+	return strings.HasPrefix(assetName, prefix) && strings.Contains(assetName, osAndArch)
 }
 
 func (d *downloader) execute(file string) error {
