@@ -22,8 +22,18 @@ snapcrafts:
     publish: true
     summary: obt is a downloader for the GitHub release page.
     description: obt is a downloader for the GitHub release page.
+    confinement: classic
     license: MIT
     base: core18
+    apps:
+      drumroll:
+        plugs: ["network", "personal-files"]
+    plugs:
+      personal-files:
+        read:
+        - $HOME/.config/obt/config.toml
+        write:
+        - $HOME/.config/obt/config.toml
 changelog:
   sort: asc
   filters:
