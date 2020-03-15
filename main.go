@@ -10,6 +10,7 @@ import (
 
 	"github.com/y-yagi/configure"
 	"github.com/y-yagi/debuglog"
+	"github.com/y-yagi/goext/arr"
 )
 
 const cmd = "obt"
@@ -28,7 +29,8 @@ var (
 )
 
 type config struct {
-	Path string `toml:"path"`
+	Path      string   `toml:"path"`
+	Installed []string `toml:"installed"`
 }
 
 func main() {
@@ -109,6 +111,10 @@ func run(args []string) int {
 		return msg(err)
 	}
 
+	if !arr.Contains(cfg.Installed, file) {
+		cfg.Installed = append(cfg.Installed, file)
+		configure.Save(cmd, cfg)
+	}
 	fmt.Fprintf(os.Stdout, "Install '%s' to '%s'.\n", binaryName, file)
 	return 0
 }
