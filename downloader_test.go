@@ -43,14 +43,14 @@ func TestDownloader_TarGz(t *testing.T) {
 	}
 }
 
-func TestDownloader_Zip(t *testing.T) {
+func TestDownloader_Gzip(t *testing.T) {
 	tempDir, err := ioutil.TempDir("", "obttest")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(tempDir)
 
-	buf, err := ioutil.ReadFile("testdata/sample.zip")
+	buf, err := ioutil.ReadFile("testdata/sample.gzip")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +59,7 @@ func TestDownloader_Zip(t *testing.T) {
 
 	downloaded := tempDir + "/sample"
 	d := downloader{}
-	d.downloadZip(&r, downloaded)
+	d.downloadGzip(&r, downloaded)
 
 	if !osext.IsExist(downloaded) {
 		t.Fatalf("file download failed")
@@ -85,7 +85,7 @@ func TestIsAvailableBinary(t *testing.T) {
 	}{
 		{"golangci-lint-1.23.8-" + osAndArch + ".tar.gz", true},
 		{"golangci-lint-1.23.8-" + osAndArch + ".deb", false},
-		{"golangci-lint-1.23.8-" + osAndArch + ".zip", true},
+		{"golangci-lint-1.23.8-" + osAndArch + ".gzip", true},
 	}
 
 	d := downloader{}

@@ -20,7 +20,7 @@ type fileType int
 const (
 	binary fileType = iota
 	tarGz
-	zip
+	gzipType
 )
 
 type downloader struct {
@@ -53,8 +53,8 @@ func (d *downloader) findDownloadURL() error {
 			d.url = *asset.BrowserDownloadURL
 			if strings.HasSuffix(*asset.Name, "tar.gz") {
 				d.fType = tarGz
-			} else if strings.HasSuffix(*asset.Name, "zip") {
-				d.fType = zip
+			} else if strings.HasSuffix(*asset.Name, "gzip") {
+				d.fType = gzipType
 			} else {
 				d.fType = binary
 			}
@@ -97,8 +97,8 @@ func (d *downloader) execute(file string) error {
 		return d.downloadTarGz(&resp.Body, file)
 	}
 
-	if d.fType == zip {
-		return d.downloadZip(&resp.Body, file)
+	if d.fType == gzipType {
+		return d.downloadGzip(&resp.Body, file)
 	}
 
 	return d.downloadBinary(&resp.Body, file)
@@ -138,7 +138,7 @@ func (d *downloader) downloadTarGz(body *io.ReadCloser, file string) error {
 	return errors.New("can't install released binary. This is a possibility that bug of `obt`. Please report an issue")
 }
 
-func (d *downloader) downloadZip(body *io.ReadCloser, file string) error {
+func (d *downloader) downloadGzip(body *io.ReadCloser, file string) error {
 	r, err := gzip.NewReader(*body)
 	if err != nil {
 		return err
