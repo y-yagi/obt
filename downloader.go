@@ -37,7 +37,7 @@ func (d *downloader) findDownloadURL() error {
 		return err
 	}
 
-	logger.Printf("latest release version: %+v\n", *release.Name)
+	logger.Printf("latest release : %+v\n", *release.TagName)
 
 	for _, asset := range release.Assets {
 		if len(binaryName) == 0 {
