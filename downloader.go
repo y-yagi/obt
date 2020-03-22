@@ -141,7 +141,7 @@ func (d *downloader) downloadTarGz(body *io.ReadCloser, file string) error {
 func (d *downloader) downloadZip(body *io.ReadCloser, file string) error {
 	r, err := gzip.NewReader(*body)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	bs, err := ioutil.ReadAll(r)
