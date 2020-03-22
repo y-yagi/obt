@@ -93,19 +93,18 @@ func run(args []string) int {
 		return 0
 	}
 
-	downloader := downloader{user: a[len(a)-2], repository: a[len(a)-1]}
+	downloader := downloader{user: a[len(a)-2], repository: a[len(a)-1], binaryName: binaryName}
 	err := downloader.findDownloadURL()
 	if err != nil {
 		return msg(err)
 	}
 
-	logger.Printf("download file from '%+v'\n", downloader.url)
 	path := determinePath()
 	if _, err := os.Stat(path); err != nil {
 		return msg(err)
 	}
 
-	file := filepath.Join(strings.TrimSuffix(path, "\n"), binaryName)
+	file := filepath.Join(strings.TrimSuffix(path, "\n"), downloader.binaryName)
 	err = downloader.execute(file)
 	if err != nil {
 		return msg(err)
@@ -115,7 +114,7 @@ func run(args []string) int {
 		cfg.Installed = append(cfg.Installed, file)
 		configure.Save(cmd, cfg)
 	}
-	fmt.Fprintf(os.Stdout, "Install '%s' to '%s'.\n", binaryName, file)
+	fmt.Fprintf(os.Stdout, "Install '%s' to '%s'.\n", downloader.binaryName, file)
 	return 0
 }
 
