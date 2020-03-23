@@ -21,7 +21,7 @@ type fileType int
 
 const (
 	binary fileType = iota
-	tarGz
+	tarGzType
 	gzipType
 	zipType
 )
@@ -56,7 +56,7 @@ func (d *downloader) findDownloadURL() error {
 		if d.isAvailableBinary(*asset.Name) {
 			d.url = *asset.BrowserDownloadURL
 			if strings.HasSuffix(*asset.Name, "tar.gz") {
-				d.fType = tarGz
+				d.fType = tarGzType
 			} else if strings.HasSuffix(*asset.Name, "gzip") {
 				d.fType = gzipType
 			} else if strings.HasSuffix(*asset.Name, "zip") {
@@ -99,7 +99,7 @@ func (d *downloader) execute(file string) error {
 	}
 	defer resp.Body.Close()
 
-	if d.fType == tarGz {
+	if d.fType == tarGzType {
 		return d.downloadTarGz(&resp.Body, file)
 	}
 
