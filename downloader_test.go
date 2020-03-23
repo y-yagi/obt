@@ -43,7 +43,41 @@ func TestDownloader_TarGz(t *testing.T) {
 	}
 }
 
+func TestDownloader_Gzip(t *testing.T) {
+	tempDir, err := ioutil.TempDir("", "obttest")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	buf, err := ioutil.ReadFile("testdata/sample.gzip")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	r := ioutil.NopCloser(strings.NewReader(string(buf)))
+
+	downloaded := tempDir + "/sample"
+	d := downloader{}
+	d.downloadGzip(&r, downloaded)
+
+	if !osext.IsExist(downloaded) {
+		t.Fatalf("file download failed")
+	}
+
+	buf, err = ioutil.ReadFile(downloaded)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := "sample\n"
+	if string(buf) != want {
+		t.Fatalf("expected '%s', but got '%s'\n", want, buf)
+	}
+}
+
 func TestDownloader_Zip(t *testing.T) {
+	binaryName = "sample.txt"
 	tempDir, err := ioutil.TempDir("", "obttest")
 	if err != nil {
 		t.Fatal(err)
@@ -59,7 +93,9 @@ func TestDownloader_Zip(t *testing.T) {
 
 	downloaded := tempDir + "/sample"
 	d := downloader{}
-	d.downloadZip(&r, downloaded)
+	if err := d.downloadZip(&r, downloaded); err != nil {
+		t.Fatal(err)
+	}
 
 	if !osext.IsExist(downloaded) {
 		t.Fatalf("file download failed")
@@ -85,10 +121,11 @@ func TestIsAvailableBinary(t *testing.T) {
 	}{
 		{"golangci-lint-1.23.8-" + osAndArch + ".tar.gz", true},
 		{"golangci-lint-1.23.8-" + osAndArch + ".deb", false},
+		{"golangci-lint-1.23.8-" + osAndArch + ".gzip", true},
 		{"golangci-lint-1.23.8-" + osAndArch + ".zip", true},
 	}
 
-	d := downloader{}
+	d := downloader{binaryName: "golangci-lint"}
 	for _, tt := range tests {
 		got := d.isAvailableBinary(tt.in)
 		if tt.want != got {

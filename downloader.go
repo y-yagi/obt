@@ -2,6 +2,8 @@ package main
 
 import (
 	"archive/tar"
+	"archive/zip"
+	"bytes"
 	"compress/gzip"
 	"context"
 	"errors"
@@ -20,13 +22,15 @@ type fileType int
 const (
 	binary fileType = iota
 	tarGz
-	zip
+	gzipType
+	zipType
 )
 
 type downloader struct {
 	user       string
 	repository string
 	url        string
+	binaryName string
 	fType      fileType
 }
 
@@ -40,12 +44,12 @@ func (d *downloader) findDownloadURL() error {
 	logger.Printf("latest release : %+v\n", *release.TagName)
 
 	for _, asset := range release.Assets {
-		if len(binaryName) == 0 {
+		if len(d.binaryName) == 0 {
 			// TODO(y-yagi): Should I check all assets?
 			if a := strings.Split(*asset.Name, "_"); len(a) > 1 {
-				binaryName = a[0]
+				d.binaryName = a[0]
 			} else {
-				binaryName = d.repository
+				d.binaryName = d.repository
 			}
 		}
 
@@ -53,8 +57,10 @@ func (d *downloader) findDownloadURL() error {
 			d.url = *asset.BrowserDownloadURL
 			if strings.HasSuffix(*asset.Name, "tar.gz") {
 				d.fType = tarGz
+			} else if strings.HasSuffix(*asset.Name, "gzip") {
+				d.fType = gzipType
 			} else if strings.HasSuffix(*asset.Name, "zip") {
-				d.fType = zip
+				d.fType = zipType
 			} else {
 				d.fType = binary
 			}
@@ -62,7 +68,7 @@ func (d *downloader) findDownloadURL() error {
 		}
 	}
 
-	msg := fmt.Sprintf("can't find an available released binary. isn't the binary name '%s'?", binaryName)
+	msg := fmt.Sprintf("can't find an available released binary. isn't the binary name '%s'?", d.binaryName)
 	return errors.New(msg)
 }
 
@@ -74,7 +80,7 @@ func (d *downloader) isAvailableBinary(assetName string) bool {
 	osAndArch := runtime.GOOS + "_" + runtime.GOARCH
 
 	assetName = strings.Replace(assetName, "-", "_", -1)
-	prefix := strings.Replace(binaryName, "-", "_", -1)
+	prefix := strings.Replace(d.binaryName, "-", "_", -1)
 	assetName = strings.ToLower(assetName)
 	if runtime.GOARCH == "amd64" {
 		assetName = strings.Replace(assetName, "x86_64", "amd64", -1)
@@ -97,7 +103,11 @@ func (d *downloader) execute(file string) error {
 		return d.downloadTarGz(&resp.Body, file)
 	}
 
-	if d.fType == zip {
+	if d.fType == gzipType {
+		return d.downloadGzip(&resp.Body, file)
+	}
+
+	if d.fType == zipType {
 		return d.downloadZip(&resp.Body, file)
 	}
 
@@ -121,7 +131,7 @@ func (d *downloader) downloadTarGz(body *io.ReadCloser, file string) error {
 			return nil
 		}
 
-		if strings.HasSuffix(hdr.Name, binaryName) {
+		if strings.HasSuffix(hdr.Name, d.binaryName) {
 			bs, err := ioutil.ReadAll(tr)
 			if err != nil {
 				return nil
@@ -138,10 +148,10 @@ func (d *downloader) downloadTarGz(body *io.ReadCloser, file string) error {
 	return errors.New("can't install released binary. This is a possibility that bug of `obt`. Please report an issue")
 }
 
-func (d *downloader) downloadZip(body *io.ReadCloser, file string) error {
+func (d *downloader) downloadGzip(body *io.ReadCloser, file string) error {
 	r, err := gzip.NewReader(*body)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	bs, err := ioutil.ReadAll(r)
@@ -154,6 +164,36 @@ func (d *downloader) downloadZip(body *io.ReadCloser, file string) error {
 		return err
 	}
 	return nil
+}
+
+func (d *downloader) downloadZip(body *io.ReadCloser, file string) error {
+	zipdata, err := ioutil.ReadAll(*body)
+	if err != nil {
+		return err
+	}
+
+	z, err := zip.NewReader(bytes.NewReader(zipdata), int64(len(zipdata)))
+	if err != nil {
+		return err
+	}
+
+	for _, f := range z.File {
+		if strings.HasSuffix(f.Name, d.binaryName) {
+			r, err := f.Open()
+			if err != nil {
+				return err
+			}
+
+			b, err := ioutil.ReadAll(r)
+			if err != nil {
+				return err
+			}
+
+			err = ioutil.WriteFile(file, b, 0755)
+			return err
+		}
+	}
+	return errors.New("can't install released binary. This is a possibility that bug of `obt`. Please report an issue")
 }
 
 func (d *downloader) downloadBinary(body *io.ReadCloser, file string) error {
