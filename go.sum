@@ -11,3 +11,5 @@ github.com/y-yagi/debuglog v0.2.0 h1:v4VETfgN4Zffz9AEtPo37UcHIQhoQz/1ggp7WnjcuSE
 github.com/y-yagi/debuglog v0.2.0/go.mod h1:QqEOXhLIjhkErqqKVaxjXhHNxr8SaV/fnINtOkWBW0E=
 github.com/y-yagi/goext v0.4.0 h1:49OJwAG+lQSDikAYY6GWlmgOGbAaLuJKCugbmyTmwnM=
 github.com/y-yagi/goext v0.4.0/go.mod h1:0OhjQ0asZ5akCui3QgCkDjNHHu8y37LJv2WX/CY24Sg=
+github.com/y-yagi/goext v0.5.0 h1:AkbWt9nnCa3F9VIhQQzz6r/xYw69TCsE8i4kVnj/guY=
+github.com/y-yagi/goext v0.5.0/go.mod h1:0OhjQ0asZ5akCui3QgCkDjNHHu8y37LJv2WX/CY24Sg=
