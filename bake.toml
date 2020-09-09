@@ -7,7 +7,7 @@ args = ["test", "-v", "./..."]
 
 [clean]
 command = "go"
-args = ["clean"]
+args = ["clean", "-testcache"]
 
 [build]
 command = "go"
