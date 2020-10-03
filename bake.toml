@@ -2,29 +2,23 @@
 dependencies = ["build"]
 
 [test]
-command = "go"
-args = ["test", "-v", "./..."]
+command = ["go", "test", "-v", "./..."]
 
 [clean]
-command = "go"
-args = ["clean", "-testcache"]
+command = ["go", "clean", "-testcache"]
 
 [build]
-command = "go"
-args = ["build"]
+command = ["go", "build"]
 dependencies = ["clean"]
 
 [lint]
 dependencies = ["golint", "staticcheck"]
 
 [golint]
-command = "golint"
-args = ["-set_exit_status"]
+command = ["golint", "-set_exit_status"]
 
 [staticcheck]
-command = "staticcheck"
-args = ["./..."]
+command = ["staticcheck", "./..."]
 
 [install_tools]
-command = "go"
-args = ["-u", "golang.org/x/lint/golint", "honnef.co/go/tools/cmd/staticcheck"]
+command = ["go", "-u", "golang.org/x/lint/golint", "honnef.co/go/tools/cmd/staticcheck"]
