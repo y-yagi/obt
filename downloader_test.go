@@ -112,6 +112,39 @@ func TestDownloader_Zip(t *testing.T) {
 	}
 }
 
+func TestDownloader_TarXz(t *testing.T) {
+	tempDir, err := ioutil.TempDir("", "obttest")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	buf, err := ioutil.ReadFile("testdata/sample.tar.xz")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	r := ioutil.NopCloser(strings.NewReader(string(buf)))
+
+	downloaded := tempDir + "/sample"
+	d := downloader{}
+	d.downloadTarXz(&r, downloaded)
+
+	if !osext.IsExist(downloaded) {
+		t.Fatalf("file download failed")
+	}
+
+	buf, err = ioutil.ReadFile(downloaded)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := "sample\n"
+	if string(buf) != want {
+		t.Fatalf("expected '%s', but got '%s'\n", want, buf)
+	}
+}
+
 func TestIsAvailableBinary(t *testing.T) {
 	osAndArch := runtime.GOOS + "_" + runtime.GOARCH
 
