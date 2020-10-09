@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/google/go-github/github"
+	"github.com/ulikunitz/xz"
 )
 
 type fileType int
@@ -24,6 +25,7 @@ const (
 	tarGzType
 	gzipType
 	zipType
+	tarXzType
 )
 
 type downloader struct {
@@ -61,6 +63,8 @@ func (d *downloader) findDownloadURL() error {
 				d.fType = gzipType
 			} else if strings.HasSuffix(*asset.Name, "zip") {
 				d.fType = zipType
+			} else if strings.HasSuffix(*asset.Name, "tar.xz") {
+				d.fType = tarXzType
 			} else {
 				d.fType = binary
 			}
@@ -99,16 +103,15 @@ func (d *downloader) execute(file string) error {
 	}
 	defer resp.Body.Close()
 
-	if d.fType == tarGzType {
+	switch d.fType {
+	case tarGzType:
 		return d.downloadTarGz(&resp.Body, file)
-	}
-
-	if d.fType == gzipType {
+	case gzipType:
 		return d.downloadGzip(&resp.Body, file)
-	}
-
-	if d.fType == zipType {
+	case zipType:
 		return d.downloadZip(&resp.Body, file)
+	case tarXzType:
+		return d.downloadTarXz(&resp.Body, file)
 	}
 
 	return d.downloadBinary(&resp.Body, file)
@@ -207,6 +210,40 @@ func (d *downloader) downloadBinary(body *io.ReadCloser, file string) error {
 		return err
 	}
 	return nil
+}
+
+func (d *downloader) downloadTarXz(body *io.ReadCloser, file string) error {
+	archive, err := xz.NewReader(*body)
+	if err != nil {
+		return nil
+	}
+
+	tr := tar.NewReader(archive)
+
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil
+		}
+
+		if strings.HasSuffix(hdr.Name, d.binaryName) {
+			bs, err := ioutil.ReadAll(tr)
+			if err != nil {
+				return nil
+			}
+
+			err = ioutil.WriteFile(file, bs, 0755)
+			if err != nil {
+				return nil
+			}
+			return nil
+		}
+	}
+
+	return errors.New("can't install released binary. This is a possibility that bug of `obt`. Please report an issue")
 }
 
 func (d *downloader) isSupportedFormat(name string) bool {
