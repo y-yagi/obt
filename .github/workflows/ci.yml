@@ -32,13 +32,15 @@ jobs:
       env:
         GO111MODULE: on
 
-    - name: Run golangci-lint
+    - name: Install obt
       run: |
-        export PATH=$PATH:$(go env GOPATH)/bin
-        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.23.8
-        golangci-lint run --disable errcheck
-      env:
-        GO111MODULE: on
+        sudo snap install obt
+
+    - name: Install golangci-lint
+      run: sudo obt https://github.com/golangci/golangci-lint
+
+    - name: Run golangci-lint
+      run: golangci-lint run --disable errcheck
 
     - name: Run test
       run: |
