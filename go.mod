@@ -8,5 +8,5 @@ require (
 	github.com/ulikunitz/xz v0.5.9
 	github.com/y-yagi/configure v0.2.0
 	github.com/y-yagi/debuglog v0.2.0
-	github.com/y-yagi/goext v0.5.0
+	github.com/y-yagi/goext v0.6.0
 )
