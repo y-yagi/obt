@@ -7,6 +7,6 @@ require (
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/ulikunitz/xz v0.5.10
 	github.com/y-yagi/configure v0.2.0
-	github.com/y-yagi/debuglog v0.2.0
+	github.com/y-yagi/debuglog v0.2.1
 	github.com/y-yagi/goext v0.6.0
 )
