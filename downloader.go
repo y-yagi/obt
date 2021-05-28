@@ -68,6 +68,8 @@ func (d *downloader) findDownloadURL() error {
 			} else {
 				d.fType = binary
 			}
+
+			logger.Printf("download file from : %+v\n", d.url)
 			return nil
 		}
 	}
