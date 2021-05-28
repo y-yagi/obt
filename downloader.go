@@ -249,7 +249,7 @@ func (d *downloader) downloadTarXz(body *io.ReadCloser, file string) error {
 }
 
 func (d *downloader) isSupportedFormat(name string) bool {
-	suffixes := []string{"deb", "rpm", "msi"}
+	suffixes := []string{"deb", "rpm", "msi", "apk"}
 	for _, v := range suffixes {
 		if strings.HasSuffix(name, v) {
 			return false
