@@ -9,7 +9,7 @@ command = ["go", "clean", "-testcache"]
 
 [build]
 command = ["go", "build"]
-dependencies = ["clean"]
+dependencies = ["tidy", "clean"]
 
 [lint]
 dependencies = ["golint", "staticcheck"]
@@ -22,3 +22,6 @@ command = ["staticcheck", "./..."]
 
 [install_tools]
 command = ["go", "-u", "golang.org/x/lint/golint", "honnef.co/go/tools/cmd/staticcheck"]
+
+[tidy]
+command = ["go", "mod", "tidy"]
