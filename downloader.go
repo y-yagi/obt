@@ -15,6 +15,8 @@ import (
 	"strings"
 
 	"github.com/google/go-github/github"
+	"github.com/gregjones/httpcache"
+	"github.com/gregjones/httpcache/diskcache"
 	"github.com/ulikunitz/xz"
 )
 
@@ -34,10 +36,19 @@ type downloader struct {
 	url        string
 	binaryName string
 	fType      fileType
+	cachePath  string
 }
 
 func (d *downloader) findDownloadURL() error {
-	client := github.NewClient(nil)
+	var client *github.Client
+
+	if len(d.cachePath) != 0 {
+		client = github.NewClient(httpcache.NewTransport(diskcache.New(d.cachePath)).Client())
+		logger.Printf("use httpcache. path: %+v\n", d.cachePath)
+	} else {
+		client = github.NewClient(nil)
+	}
+
 	release, _, err := client.Repositories.GetLatestRelease(context.Background(), d.user, d.repository)
 	if err != nil {
 		return err

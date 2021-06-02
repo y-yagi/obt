@@ -30,6 +30,7 @@ var (
 
 type config struct {
 	Path      string   `toml:"path"`
+	CachePath string   `toml:"cache_path"`
 	Installed []string `toml:"installed"`
 }
 
@@ -93,7 +94,7 @@ func run(args []string) int {
 		return 0
 	}
 
-	downloader := downloader{user: a[len(a)-2], repository: a[len(a)-1], binaryName: binaryName}
+	downloader := downloader{user: a[len(a)-2], repository: a[len(a)-1], binaryName: binaryName, cachePath: cfg.CachePath}
 	err := downloader.findDownloadURL()
 	if err != nil {
 		return msg(err)
