@@ -58,8 +58,10 @@ func (d *downloader) findDownloadURL() error {
 
 	for _, asset := range release.Assets {
 		if len(d.binaryName) == 0 {
-			// TODO(y-yagi): Should I check all assets?
-			if a := strings.Split(*asset.Name, "_"); len(a) > 1 {
+			if strings.Contains(*asset.Name, d.repository) {
+				d.binaryName = d.repository
+			} else if a := strings.Split(*asset.Name, "_"); len(a) > 1 {
+				// TODO(y-yagi): Should I check all assets?
 				d.binaryName = a[0]
 			} else {
 				d.binaryName = d.repository
@@ -94,8 +96,6 @@ func (d *downloader) isAvailableBinary(assetName string) bool {
 		return false
 	}
 
-	osAndArch := runtime.GOOS + "_" + runtime.GOARCH
-
 	assetName = strings.Replace(assetName, "-", "_", -1)
 	prefix := strings.Replace(d.binaryName, "-", "_", -1)
 	assetName = strings.ToLower(assetName)
@@ -106,7 +106,7 @@ func (d *downloader) isAvailableBinary(assetName string) bool {
 		assetName = strings.Replace(assetName, "x86", "386", -1)
 	}
 
-	return strings.HasPrefix(assetName, prefix) && strings.Contains(assetName, osAndArch)
+	return strings.HasPrefix(assetName, prefix) && strings.Contains(assetName, runtime.GOOS) && strings.Contains(assetName, runtime.GOARCH)
 }
 
 func (d *downloader) execute(file string) error {

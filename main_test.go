@@ -39,3 +39,19 @@ func TestDownloadBinary(t *testing.T) {
 		t.Fatalf("file download failed")
 	}
 }
+
+func TestDownloadRustPackage(t *testing.T) {
+	setFlags()
+	tempDir, err := ioutil.TempDir("", "obttest")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	os.Chdir(tempDir)
+	run([]string{"obt", "-p", "./", "https://github.com/sharkdp/fd"})
+
+	if !osext.IsExist("fd") {
+		t.Fatalf("file download failed")
+	}
+}
