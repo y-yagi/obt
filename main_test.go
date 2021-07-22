@@ -25,9 +25,6 @@ func TestDownloadTarGz(t *testing.T) {
 }
 
 func TestDownloadBinary(t *testing.T) {
-	// FIXME: Latest `httpstat` doesn't include a binary file.
-	t.Skip()
-
 	setFlags()
 	tempDir, err := ioutil.TempDir("", "obttest")
 	if err != nil {
@@ -36,7 +33,7 @@ func TestDownloadBinary(t *testing.T) {
 	defer os.RemoveAll(tempDir)
 
 	os.Chdir(tempDir)
-	run([]string{"obt", "-p", "./", "https://github.com/davecheney/httpstat"})
+	run([]string{"obt", "-p", "./", "-tag", "v1.0.0", "https://github.com/davecheney/httpstat"})
 
 	if !osext.IsExist("httpstat") {
 		t.Fatalf("file download failed")

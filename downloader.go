@@ -37,6 +37,7 @@ type downloader struct {
 	binaryName string
 	fType      fileType
 	cachePath  string
+	releaseTag string
 }
 
 func (d *downloader) findDownloadURL() error {
@@ -49,12 +50,22 @@ func (d *downloader) findDownloadURL() error {
 		client = github.NewClient(nil)
 	}
 
-	release, _, err := client.Repositories.GetLatestRelease(context.Background(), d.user, d.repository)
-	if err != nil {
-		return err
-	}
+	var release *github.RepositoryRelease
+	var err error
 
-	logger.Printf("latest release : %+v\n", *release.TagName)
+	if len(d.releaseTag) != 0 {
+		release, _, err = client.Repositories.GetReleaseByTag(context.Background(), d.user, d.repository, d.releaseTag)
+		if err != nil {
+			return err
+		}
+	} else {
+		release, _, err = client.Repositories.GetLatestRelease(context.Background(), d.user, d.repository)
+		if err != nil {
+			return err
+		}
+
+		logger.Printf("latest release : %+v\n", *release.TagName)
+	}
 
 	for _, asset := range release.Assets {
 		if len(d.binaryName) == 0 {

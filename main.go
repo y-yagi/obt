@@ -24,6 +24,7 @@ var (
 	path        string
 	defaultPath string
 	binaryName  string
+	releaseTag  string
 
 	version = "devel"
 )
@@ -45,6 +46,7 @@ func setFlags() {
 	flags.StringVar(&path, "p", "", "install path")
 	flags.StringVar(&defaultPath, "s", "", "set default install path")
 	flags.StringVar(&binaryName, "b", "", "binary name")
+	flags.StringVar(&releaseTag, "tag", "", "release tag")
 	flags.Usage = usage
 }
 
@@ -94,7 +96,7 @@ func run(args []string) int {
 		return 0
 	}
 
-	downloader := downloader{user: a[len(a)-2], repository: a[len(a)-1], binaryName: binaryName, cachePath: cfg.CachePath}
+	downloader := downloader{user: a[len(a)-2], repository: a[len(a)-1], binaryName: binaryName, cachePath: cfg.CachePath, releaseTag: releaseTag}
 	err := downloader.findDownloadURL()
 	if err != nil {
 		return msg(err)
