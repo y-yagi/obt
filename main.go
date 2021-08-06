@@ -182,5 +182,5 @@ func saveHistory(d *downloader) error {
 }
 
 func (h *history) key() string {
-	return strings.Join([]string{h.Repository, h.Tag, h.Path}, "-")
+	return h.Path
 }
