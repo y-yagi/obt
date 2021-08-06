@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bytes"
+	"encoding/gob"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -10,7 +13,7 @@ import (
 
 	"github.com/y-yagi/configure"
 	"github.com/y-yagi/debuglog"
-	"github.com/y-yagi/goext/arr"
+	"github.com/y-yagi/goext/osext"
 )
 
 const cmd = "obt"
@@ -30,9 +33,14 @@ var (
 )
 
 type config struct {
-	Path      string   `toml:"path"`
-	CachePath string   `toml:"cache_path"`
-	Installed []string `toml:"installed"`
+	Path      string `toml:"path"`
+	CachePath string `toml:"cache_path"`
+}
+
+type history struct {
+	Repository string
+	Tag        string
+	Path       string
 }
 
 func main() {
@@ -120,9 +128,9 @@ func run(args []string) int {
 		return msg(err)
 	}
 
-	if !arr.Contains(cfg.Installed, file) {
-		cfg.Installed = append(cfg.Installed, file)
-		configure.Save(cmd, cfg)
+	err = saveHistory(&downloader)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "history save error %v\n", err)
 	}
 	fmt.Fprintf(os.Stdout, "Download '%s(%s)' to '%s'.\n", downloader.binaryName, downloader.releaseTag, file)
 	return 0
@@ -141,4 +149,38 @@ func determinePath() string {
 		return "."
 	}
 	return "/usr/local/bin/"
+}
+
+func saveHistory(d *downloader) error {
+	var histories map[string]*history
+	var buf *bytes.Buffer
+	filename := filepath.Join(configure.ConfigDir(cmd), "history")
+
+	if osext.IsExist(filename) {
+		b, err := ioutil.ReadFile(filename)
+		if err != nil {
+			return err
+		}
+		buf = bytes.NewBuffer(b)
+		err = gob.NewDecoder(buf).Decode(&histories)
+		if err != nil {
+			return err
+		}
+	} else {
+		histories = map[string]*history{}
+	}
+
+	h := history{Repository: d.user + "/" + d.repository, Tag: d.releaseTag, Path: d.binaryName}
+	histories[h.key()] = &h
+
+	buf = bytes.NewBuffer(nil)
+	err := gob.NewEncoder(buf).Encode(histories)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(filename, buf.Bytes(), 0644)
+}
+
+func (h *history) key() string {
+	return strings.Join([]string{h.Repository, h.Tag, h.Path}, "-")
 }
