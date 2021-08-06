@@ -117,7 +117,7 @@ func run(args []string) int {
 		cfg.Installed = append(cfg.Installed, file)
 		configure.Save(cmd, cfg)
 	}
-	fmt.Fprintf(os.Stdout, "Download '%s' to '%s'.\n", downloader.binaryName, file)
+	fmt.Fprintf(os.Stdout, "Download '%s(%s)' to '%s'.\n", downloader.binaryName, downloader.releaseTag, file)
 	return 0
 }
 

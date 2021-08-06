@@ -65,6 +65,7 @@ func (d *downloader) findDownloadURL() error {
 		}
 
 		logger.Printf("latest release : %+v\n", *release.TagName)
+		d.releaseTag = *release.TagName
 	}
 
 	for _, asset := range release.Assets {
