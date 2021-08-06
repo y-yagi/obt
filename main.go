@@ -96,6 +96,13 @@ func run(args []string) int {
 		return 0
 	}
 
+	if len(cfg.CachePath) == 0 {
+		dir, err := os.UserCacheDir()
+		if err == nil {
+			cfg.CachePath = filepath.Join(dir, cmd)
+		}
+	}
+
 	downloader := downloader{user: a[len(a)-2], repository: a[len(a)-1], binaryName: binaryName, cachePath: cfg.CachePath, releaseTag: releaseTag}
 	err := downloader.findDownloadURL()
 	if err != nil {
