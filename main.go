@@ -38,9 +38,9 @@ type config struct {
 }
 
 type history struct {
-	Repository string
-	Tag        string
-	Path       string
+	URL  string
+	Tag  string
+	Path string
 }
 
 func main() {
@@ -128,7 +128,7 @@ func run(args []string) int {
 		return msg(err)
 	}
 
-	err = saveHistory(&downloader)
+	err = saveHistory(&downloader, url)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "history save error %v\n", err)
 	}
@@ -151,7 +151,7 @@ func determinePath() string {
 	return "/usr/local/bin/"
 }
 
-func saveHistory(d *downloader) error {
+func saveHistory(d *downloader, url string) error {
 	var histories map[string]*history
 	var buf *bytes.Buffer
 	filename := filepath.Join(configure.ConfigDir(cmd), "history")
@@ -170,7 +170,7 @@ func saveHistory(d *downloader) error {
 		histories = map[string]*history{}
 	}
 
-	h := history{Repository: d.user + "/" + d.repository, Tag: d.releaseTag, Path: d.binaryName}
+	h := history{URL: url, Tag: d.releaseTag, Path: d.binaryName}
 	histories[h.key()] = &h
 
 	buf = bytes.NewBuffer(nil)
