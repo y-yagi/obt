@@ -33,6 +33,7 @@ var (
 	defaultPath   string
 	binaryName    string
 	releaseTag    string
+	historyFile   string
 
 	version = "devel"
 )
@@ -55,6 +56,7 @@ func setFlags() {
 	flags.StringVar(&defaultPath, "s", "", "set default install path")
 	flags.StringVar(&binaryName, "b", "", "binary name")
 	flags.StringVar(&releaseTag, "tag", "", "release tag")
+	flags.StringVar(&historyFile, "history", "", "history file")
 	flags.Usage = usage
 }
 
@@ -186,10 +188,13 @@ func askForConfirmation(stdout io.Writer) bool {
 func saveHistory(d *downloader, fullpath, url string) error {
 	var histories map[string]*history
 	var buf *bytes.Buffer
-	filename := filepath.Join(configure.ConfigDir(cmd), "history")
 
-	if osext.IsExist(filename) {
-		b, err := ioutil.ReadFile(filename)
+	if len(historyFile) == 0 {
+		historyFile = filepath.Join(configure.ConfigDir(cmd), "history")
+	}
+
+	if osext.IsExist(historyFile) {
+		b, err := ioutil.ReadFile(historyFile)
 		if err != nil {
 			return err
 		}
@@ -210,19 +215,21 @@ func saveHistory(d *downloader, fullpath, url string) error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(filename, buf.Bytes(), 0644)
+	return ioutil.WriteFile(historyFile, buf.Bytes(), 0644)
 }
 
 func showInstalledBinaries(stdout io.Writer) error {
 	var histories map[string]*history
 
-	filename := filepath.Join(configure.ConfigDir(cmd), "history")
+	if len(historyFile) == 0 {
+		historyFile = filepath.Join(configure.ConfigDir(cmd), "history")
+	}
 
-	if !osext.IsExist(filename) {
+	if !osext.IsExist(historyFile) {
 		return errors.New("history file doesn't exist")
 	}
 
-	b, err := ioutil.ReadFile(filename)
+	b, err := ioutil.ReadFile(historyFile)
 	if err != nil {
 		return err
 	}
