@@ -38,12 +38,6 @@ type config struct {
 	CachePath string `toml:"cache_path"`
 }
 
-type history struct {
-	URL  string
-	Tag  string
-	Path string
-}
-
 func main() {
 	setFlags()
 	os.Exit(run(os.Args))
@@ -208,8 +202,4 @@ func saveHistory(d *downloader, url string) error {
 		return err
 	}
 	return ioutil.WriteFile(filename, buf.Bytes(), 0644)
-}
-
-func (h *history) key() string {
-	return h.Path
 }
