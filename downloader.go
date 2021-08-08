@@ -165,11 +165,7 @@ func (d *downloader) downloadTarGz(body *io.ReadCloser, file string) error {
 				return nil
 			}
 
-			err = ioutil.WriteFile(file, bs, 0755)
-			if err != nil {
-				return nil
-			}
-			return nil
+			return d.writeFile(file, bs)
 		}
 	}
 
@@ -187,11 +183,7 @@ func (d *downloader) downloadGzip(body *io.ReadCloser, file string) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(file, bs, 0755)
-	if err != nil {
-		return err
-	}
-	return nil
+	return d.writeFile(file, bs)
 }
 
 func (d *downloader) downloadZip(body *io.ReadCloser, file string) error {
@@ -217,8 +209,7 @@ func (d *downloader) downloadZip(body *io.ReadCloser, file string) error {
 				return err
 			}
 
-			err = ioutil.WriteFile(file, b, 0755)
-			return err
+			return d.writeFile(file, b)
 		}
 	}
 	return errors.New("can't install released binary. This is a possibility that bug of `obt`. Please report an issue")
@@ -230,11 +221,7 @@ func (d *downloader) downloadBinary(body *io.ReadCloser, file string) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(file, bs, 0755)
-	if err != nil {
-		return err
-	}
-	return nil
+	return d.writeFile(file, bs)
 }
 
 func (d *downloader) downloadTarXz(body *io.ReadCloser, file string) error {
@@ -260,11 +247,7 @@ func (d *downloader) downloadTarXz(body *io.ReadCloser, file string) error {
 				return nil
 			}
 
-			err = ioutil.WriteFile(file, bs, 0755)
-			if err != nil {
-				return nil
-			}
-			return nil
+			return d.writeFile(file, bs)
 		}
 	}
 
@@ -280,4 +263,8 @@ func (d *downloader) isSupportedFormat(name string) bool {
 	}
 
 	return true
+}
+
+func (d *downloader) writeFile(file string, b []byte) error {
+	return ioutil.WriteFile(file, b, 0755)
 }
