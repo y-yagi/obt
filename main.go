@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -123,6 +124,15 @@ func run(args []string) int {
 	}
 
 	file := filepath.Join(strings.TrimSuffix(path, "\n"), downloader.binaryName)
+
+	if osext.IsExist(file) {
+		fmt.Fprintf(os.Stdout, "'%s' exists. Override a file?\nPlease type (y)es or (n)o and then press enter: ", file)
+		if !askForConfirmation() {
+			fmt.Fprint(os.Stdout, "download canceled.\n")
+			return 0
+		}
+	}
+
 	err = downloader.execute(file)
 	if err != nil {
 		return msg(err)
@@ -149,6 +159,25 @@ func determinePath() string {
 		return "."
 	}
 	return "/usr/local/bin/"
+}
+
+func askForConfirmation() bool {
+	var response string
+
+	_, err := fmt.Scanln(&response)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	switch strings.ToLower(response) {
+	case "y", "yes":
+		return true
+	case "n", "no":
+		return false
+	default:
+		fmt.Fprintln(os.Stdout, "Please type (y)es or (n)o and then press enter: ")
+		return askForConfirmation()
+	}
 }
 
 func saveHistory(d *downloader, url string) error {
