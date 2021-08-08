@@ -42,6 +42,6 @@ jobs:
 
     - name: Run test
       run: |
-        go test -v main.go downloader.go downloader_test.go
+        go test -v ./...
       env:
         GO111MODULE: on
