@@ -12,10 +12,7 @@ command = ["go", "build"]
 dependencies = ["tidy", "clean"]
 
 [lint]
-dependencies = ["golint", "staticcheck"]
-
-[golint]
-command = ["golint", "-set_exit_status"]
+dependencies = ["staticcheck"]
 
 [staticcheck]
 command = ["staticcheck", "./..."]

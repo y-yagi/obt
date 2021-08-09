@@ -24,14 +24,6 @@ jobs:
       env:
         GO111MODULE: on
 
-    - name: Run lint
-      run: |
-        export PATH=$PATH:$(go env GOPATH)/bin
-        go get -u golang.org/x/lint/golint
-        golint -set_exit_status
-      env:
-        GO111MODULE: on
-
     - name: Run golangci-lint
       run: |
         export PATH=$PATH:$(go env GOPATH)/bin
