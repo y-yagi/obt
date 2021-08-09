@@ -86,6 +86,10 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return 0
 	}
 
+	if len(historyFile) == 0 {
+		historyFile = filepath.Join(configure.ConfigDir(cmd), "history")
+	}
+
 	if showInstalled {
 		return msg(showInstalledBinaries(stdout), stderr)
 	}
@@ -189,10 +193,6 @@ func saveHistory(d *downloader, fullpath, url string) error {
 	var histories map[string]*history
 	var buf *bytes.Buffer
 
-	if len(historyFile) == 0 {
-		historyFile = filepath.Join(configure.ConfigDir(cmd), "history")
-	}
-
 	if osext.IsExist(historyFile) {
 		b, err := ioutil.ReadFile(historyFile)
 		if err != nil {
@@ -220,10 +220,6 @@ func saveHistory(d *downloader, fullpath, url string) error {
 
 func showInstalledBinaries(stdout io.Writer) error {
 	var histories map[string]*history
-
-	if len(historyFile) == 0 {
-		historyFile = filepath.Join(configure.ConfigDir(cmd), "history")
-	}
 
 	if !osext.IsExist(historyFile) {
 		return errors.New("history file doesn't exist")
