@@ -59,3 +59,22 @@ func TestDownloadRustPackage(t *testing.T) {
 		t.Fatalf("file download failed")
 	}
 }
+
+func TestShowHistory(t *testing.T) {
+	setFlags()
+	stdout, stderr := new(bytes.Buffer), new(bytes.Buffer)
+	run([]string{"obt", "-history", "./testdata/history_example", "-installed"}, stdout, stderr)
+
+	want := `
++---------------------------------+--------+--------------------------+
+|               URL               |  TAG   |           PATH           |
++---------------------------------+--------+--------------------------+
+| https://github.com/y-yagi/jpcal | v1.0.2 | /home/y-yagi/gobin/jpcal |
++---------------------------------+--------+--------------------------+
+`
+
+	got := "\n" + stdout.String()
+	if string(got) != want {
+		t.Fatalf("expected \n%s\n\nbut got \n\n%s\n", want, got)
+	}
+}
