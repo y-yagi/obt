@@ -11,6 +11,7 @@ import (
 
 func TestDownloadTarGz(t *testing.T) {
 	setFlags()
+	origiDir, _ := os.Getwd()
 	tempDir, err := ioutil.TempDir("", "obttest")
 	if err != nil {
 		t.Fatal(err)
@@ -18,6 +19,7 @@ func TestDownloadTarGz(t *testing.T) {
 	defer os.RemoveAll(tempDir)
 
 	os.Chdir(tempDir)
+	defer os.Chdir(origiDir)
 	stdout, stderr := new(bytes.Buffer), new(bytes.Buffer)
 	run([]string{"obt", "-p", "./", "-history", "./history", "https://github.com/y-yagi/jpcal"}, stdout, stderr)
 
@@ -28,6 +30,7 @@ func TestDownloadTarGz(t *testing.T) {
 
 func TestDownloadBinary(t *testing.T) {
 	setFlags()
+	origiDir, _ := os.Getwd()
 	tempDir, err := ioutil.TempDir("", "obttest")
 	if err != nil {
 		t.Fatal(err)
@@ -35,6 +38,8 @@ func TestDownloadBinary(t *testing.T) {
 	defer os.RemoveAll(tempDir)
 
 	os.Chdir(tempDir)
+	defer os.Chdir(origiDir)
+
 	stdout, stderr := new(bytes.Buffer), new(bytes.Buffer)
 	run([]string{"obt", "-p", "./", "-tag", "v1.0.0", "-history", "./history", "https://github.com/davecheney/httpstat"}, stdout, stderr)
 
@@ -45,6 +50,7 @@ func TestDownloadBinary(t *testing.T) {
 
 func TestDownloadRustPackage(t *testing.T) {
 	setFlags()
+	origiDir, _ := os.Getwd()
 	tempDir, err := ioutil.TempDir("", "obttest")
 	if err != nil {
 		t.Fatal(err)
@@ -52,6 +58,8 @@ func TestDownloadRustPackage(t *testing.T) {
 	defer os.RemoveAll(tempDir)
 
 	os.Chdir(tempDir)
+	defer os.Chdir(origiDir)
+
 	stdout, stderr := new(bytes.Buffer), new(bytes.Buffer)
 	run([]string{"obt", "-p", "./", "-history", "./history", "https://github.com/sharkdp/fd"}, stdout, stderr)
 
