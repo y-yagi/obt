@@ -101,9 +101,13 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return 0
 	}
 
+	return msg(download(stdout, stderr), stderr)
+}
+
+func download(stdout, stderr io.Writer) error {
 	if len(flags.Args()) == 0 {
 		flags.Usage()
-		return 0
+		return nil
 	}
 
 	url := strings.TrimSuffix(flags.Args()[0], "/")
@@ -111,7 +115,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 
 	if len(a) < 2 {
 		flags.Usage()
-		return 0
+		return nil
 	}
 
 	if len(cfg.CachePath) == 0 {
@@ -124,12 +128,12 @@ func run(args []string, stdout, stderr io.Writer) int {
 	downloader := downloader{user: a[len(a)-2], repository: a[len(a)-1], binaryName: binaryName, cachePath: cfg.CachePath, releaseTag: releaseTag}
 	err := downloader.findDownloadURL()
 	if err != nil {
-		return msg(err, stderr)
+		return err
 	}
 
 	path := determinePath()
 	if _, err := os.Stat(path); err != nil {
-		return msg(err, stderr)
+		return err
 	}
 
 	file := filepath.Join(strings.TrimSuffix(path, "\n"), downloader.binaryName)
@@ -138,21 +142,22 @@ func run(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stdout, "'%s' exists. Override a file?\nPlease type (y)es or (n)o and then press enter: ", file)
 		if !askForConfirmation(stdout) {
 			fmt.Fprint(stdout, "download canceled.\n")
-			return 0
+			return nil
 		}
 	}
 
 	err = downloader.execute(file)
 	if err != nil {
-		return msg(err, stderr)
+		return err
 	}
 
 	err = saveHistory(&downloader, file, url)
 	if err != nil {
 		fmt.Fprintf(stderr, "history save error %v\n", err)
 	}
+
 	fmt.Fprintf(stdout, "Download '%s(%s)' to '%s'.\n", downloader.binaryName, downloader.releaseTag, file)
-	return 0
+	return nil
 }
 
 func determinePath() string {
