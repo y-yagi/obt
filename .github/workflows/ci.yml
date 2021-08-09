@@ -24,13 +24,11 @@ jobs:
       env:
         GO111MODULE: on
 
-    - name: Run golangci-lint
-      run: |
-        export PATH=$PATH:$(go env GOPATH)/bin
-        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.23.8
-        golangci-lint run --disable errcheck
-      env:
-        GO111MODULE: on
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v2
+      with:
+        version: latest
+        args: -D errcheck
 
     - name: Run test
       run: |
