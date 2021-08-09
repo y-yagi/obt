@@ -1,13 +1,9 @@
 package main
 
 import (
-	"bytes"
-	"encoding/gob"
-	"errors"
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -151,7 +147,8 @@ func download(stdout, stderr io.Writer) error {
 		return err
 	}
 
-	err = saveHistory(&downloader, file, url)
+	hf := HistoryFile{filename: historyFile}
+	err = hf.save(downloader, url, file)
 	if err != nil {
 		fmt.Fprintf(stderr, "history save error %v\n", err)
 	}
@@ -194,49 +191,9 @@ func askForConfirmation(stdout io.Writer) bool {
 	}
 }
 
-func saveHistory(d *downloader, fullpath, url string) error {
-	var histories map[string]*history
-	var buf *bytes.Buffer
-
-	if osext.IsExist(historyFile) {
-		b, err := ioutil.ReadFile(historyFile)
-		if err != nil {
-			return err
-		}
-		buf = bytes.NewBuffer(b)
-		err = gob.NewDecoder(buf).Decode(&histories)
-		if err != nil {
-			return err
-		}
-	} else {
-		histories = map[string]*history{}
-	}
-
-	h := history{URL: url, Tag: d.releaseTag, Path: fullpath}
-	histories[h.key()] = &h
-
-	buf = bytes.NewBuffer(nil)
-	err := gob.NewEncoder(buf).Encode(histories)
-	if err != nil {
-		return err
-	}
-	return ioutil.WriteFile(historyFile, buf.Bytes(), 0644)
-}
-
 func showInstalledBinaries(stdout io.Writer) error {
-	var histories map[string]*history
-
-	if !osext.IsExist(historyFile) {
-		return errors.New("history file doesn't exist")
-	}
-
-	b, err := ioutil.ReadFile(historyFile)
-	if err != nil {
-		return err
-	}
-
-	buf := bytes.NewBuffer(b)
-	err = gob.NewDecoder(buf).Decode(&histories)
+	hf := HistoryFile{filename: historyFile}
+	histories, err := hf.load()
 	if err != nil {
 		return err
 	}
