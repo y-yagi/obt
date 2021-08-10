@@ -86,3 +86,15 @@ func TestShowHistory(t *testing.T) {
 		t.Fatalf("expected \n%s\n\nbut got \n\n%s\n", want, got)
 	}
 }
+
+func TestSetInvalidPathToDefaultPath(t *testing.T) {
+	setFlags()
+	stdout, stderr := new(bytes.Buffer), new(bytes.Buffer)
+	run([]string{"obt", "-s", "a"}, stdout, stderr)
+
+	want := "Please specify an absolute path to the default install path.\n"
+	got := stderr.String()
+	if string(got) != want {
+		t.Fatalf("expected \n%s\n\nbut got \n\n%s\n", want, got)
+	}
+}

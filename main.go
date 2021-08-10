@@ -91,6 +91,11 @@ func run(args []string, stdout, stderr io.Writer) int {
 	}
 
 	if len(defaultPath) > 0 {
+		if !filepath.IsAbs(defaultPath) {
+			fmt.Fprintln(stderr, "Please specify an absolute path to the default install path.")
+			return 1
+		}
+
 		cfg.Path = defaultPath
 		configure.Save(cmd, cfg)
 		fmt.Fprintf(stdout, "Change default install path to '%s'\n", defaultPath)
