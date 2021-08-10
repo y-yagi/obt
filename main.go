@@ -1,13 +1,13 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
@@ -58,7 +58,7 @@ func setFlags() {
 
 func usage() {
 	fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS] URL\n\n", cmd)
-	fmt.Fprintf(os.Stderr, "Install binary file from GitHub's release page. Default install path is '%s'.\n\n", determinePath())
+	fmt.Fprintf(os.Stderr, "Install binary file from GitHub's release page. Default install path is '%s'.\n\n", cfg.Path)
 	fmt.Fprintln(os.Stderr, "OPTIONS:")
 	flags.PrintDefaults()
 }
@@ -132,7 +132,11 @@ func download(stdout, stderr io.Writer) error {
 		return err
 	}
 
-	path := determinePath()
+	path, err := determinePath()
+	if err != nil {
+		return err
+	}
+
 	if _, err := os.Stat(path); err != nil {
 		return err
 	}
@@ -162,19 +166,16 @@ func download(stdout, stderr io.Writer) error {
 	return nil
 }
 
-func determinePath() string {
+func determinePath() (string, error) {
 	if len(path) > 0 {
-		return path
+		return path, nil
 	}
 
 	if len(cfg.Path) > 0 {
-		return cfg.Path
+		return cfg.Path, nil
 	}
 
-	if runtime.GOOS == "windows" {
-		return "."
-	}
-	return "/usr/local/bin/"
+	return "", errors.New("please set a default install path(via '-s option') or an install path(via '-p' option)")
 }
 
 func askForConfirmation(stdout io.Writer) bool {
