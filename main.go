@@ -156,10 +156,12 @@ func download(stdout, stderr io.Writer) error {
 		return err
 	}
 
-	hf := HistoryFile{filename: historyFile}
-	err = hf.save(downloader, url, file)
-	if err != nil {
-		fmt.Fprintf(stderr, "history save error %v\n", err)
+	if len(path) == 0 {
+		hf := HistoryFile{filename: historyFile}
+		err = hf.save(downloader, url, file)
+		if err != nil {
+			fmt.Fprintf(stderr, "history save error %v\n", err)
+		}
 	}
 
 	fmt.Fprintf(stdout, "Download '%s(%s)' to '%s'.\n", downloader.binaryName, downloader.releaseTag, file)
