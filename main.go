@@ -25,7 +25,7 @@ var (
 	flags           *flag.FlagSet
 	showVersion     bool
 	showInstalled   bool
-	path            string
+	tmpInstallPath  string
 	defaultPath     string
 	binaryName      string
 	releaseTag      string
@@ -49,7 +49,7 @@ func setFlags() {
 	flags = flag.NewFlagSet(cmd, flag.ExitOnError)
 	flags.BoolVar(&showVersion, "v", false, "print version number")
 	flags.BoolVar(&showInstalled, "installed", false, "show installed binaries")
-	flags.StringVar(&path, "p", "", "install path")
+	flags.StringVar(&tmpInstallPath, "p", "", "temporary install path")
 	flags.StringVar(&defaultPath, "s", "", "set default install path")
 	flags.StringVar(&binaryName, "b", "", "binary name")
 	flags.StringVar(&releaseTag, "tag", "", "release tag")
@@ -165,7 +165,7 @@ func download(stdout, stderr io.Writer) error {
 		return err
 	}
 
-	if len(path) == 0 {
+	if len(tmpInstallPath) == 0 {
 		hf := HistoryFile{filename: determineHistoryFilePath()}
 		err = hf.save(downloader, url, file)
 		if err != nil {
@@ -178,8 +178,8 @@ func download(stdout, stderr io.Writer) error {
 }
 
 func determinePath() (string, error) {
-	if len(path) > 0 {
-		return path, nil
+	if len(tmpInstallPath) > 0 {
+		return tmpInstallPath, nil
 	}
 
 	if len(cfg.Path) > 0 {
