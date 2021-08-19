@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/y-yagi/goext/osext"
@@ -71,7 +72,11 @@ func TestDownloadRustPackage(t *testing.T) {
 func TestShowHistory(t *testing.T) {
 	setFlags()
 	stdout, stderr := new(bytes.Buffer), new(bytes.Buffer)
-	run([]string{"obt", "-history", "./testdata/history_example", "-installed"}, stdout, stderr)
+	abs, _ := filepath.Abs("./testdata/")
+	run([]string{"obt", "-history", abs}, stdout, stderr)
+
+	stdout, stderr = new(bytes.Buffer), new(bytes.Buffer)
+	run([]string{"obt", "-installed"}, stdout, stderr)
 
 	want := `
 +---------------------------------+--------+--------------------------+
