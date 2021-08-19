@@ -22,21 +22,22 @@ var (
 	cfg    config
 	logger *debuglog.Logger
 
-	flags         *flag.FlagSet
-	showVersion   bool
-	showInstalled bool
-	path          string
-	defaultPath   string
-	binaryName    string
-	releaseTag    string
-	historyFile   string
+	flags           *flag.FlagSet
+	showVersion     bool
+	showInstalled   bool
+	path            string
+	defaultPath     string
+	binaryName      string
+	releaseTag      string
+	historyFilePath string
 
 	version = "devel"
 )
 
 type config struct {
-	Path      string `toml:"path"`
-	CachePath string `toml:"cache_path"`
+	Path            string `toml:"path"`
+	CachePath       string `toml:"cache_path"`
+	HistoryFilePath string `toml:"history_file_path"`
 }
 
 func main() {
@@ -52,7 +53,7 @@ func setFlags() {
 	flags.StringVar(&defaultPath, "s", "", "set default install path")
 	flags.StringVar(&binaryName, "b", "", "binary name")
 	flags.StringVar(&releaseTag, "tag", "", "release tag")
-	flags.StringVar(&historyFile, "history", "", "history file")
+	flags.StringVar(&historyFilePath, "history", "", "set history file path")
 	flags.Usage = usage
 }
 
@@ -82,10 +83,6 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return 0
 	}
 
-	if len(historyFile) == 0 {
-		historyFile = filepath.Join(configure.ConfigDir(cmd), "history")
-	}
-
 	if showInstalled {
 		return msg(showInstalledBinaries(stdout), stderr)
 	}
@@ -99,6 +96,18 @@ func run(args []string, stdout, stderr io.Writer) int {
 		cfg.Path = defaultPath
 		configure.Save(cmd, cfg)
 		fmt.Fprintf(stdout, "Change default install path to '%s'\n", defaultPath)
+		return 0
+	}
+
+	if len(historyFilePath) > 0 {
+		if !filepath.IsAbs(historyFilePath) {
+			fmt.Fprintln(stderr, "Please specify an absolute path to the history file path.")
+			return 1
+		}
+
+		cfg.HistoryFilePath = historyFilePath
+		configure.Save(cmd, cfg)
+		fmt.Fprintf(stdout, "Change history file path to '%s'\n", historyFilePath)
 		return 0
 	}
 
@@ -157,7 +166,7 @@ func download(stdout, stderr io.Writer) error {
 	}
 
 	if len(path) == 0 {
-		hf := HistoryFile{filename: historyFile}
+		hf := HistoryFile{filename: determineHistoryFilePath()}
 		err = hf.save(downloader, url, file)
 		if err != nil {
 			fmt.Fprintf(stderr, "history save error %v\n", err)
@@ -180,6 +189,14 @@ func determinePath() (string, error) {
 	return "", errors.New("please set a default install path(via '-s option') or an install path(via '-p' option)")
 }
 
+func determineHistoryFilePath() string {
+	if len(cfg.HistoryFilePath) > 0 {
+		return filepath.Join(cfg.HistoryFilePath, "history")
+	}
+
+	return filepath.Join(configure.ConfigDir(cmd), "history")
+}
+
 func askForConfirmation(stdout io.Writer) bool {
 	var response string
 
@@ -200,7 +217,7 @@ func askForConfirmation(stdout io.Writer) bool {
 }
 
 func showInstalledBinaries(stdout io.Writer) error {
-	hf := HistoryFile{filename: historyFile}
+	hf := HistoryFile{filename: determineHistoryFilePath()}
 	histories, err := hf.load()
 	if err != nil {
 		return err
