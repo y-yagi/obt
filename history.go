@@ -1,12 +1,12 @@
 package main
 
-type history struct {
+type History struct {
 	URL        string
 	Tag        string
 	Path       string
 	BinaryName string
 }
 
-func (h *history) key() string {
+func (h *History) key() string {
 	return h.Path
 }
