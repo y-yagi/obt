@@ -34,7 +34,7 @@ func (hf *HistoryFile) load() (map[string]*history, error) {
 	return histories, nil
 }
 
-func (hf *HistoryFile) save(d downloader, url, downloadedFile string) error {
+func (hf *HistoryFile) save(d downloader, url, downloadedFile, binaryName string) error {
 	var histories map[string]*history
 	var buf *bytes.Buffer
 	var err error
@@ -48,7 +48,7 @@ func (hf *HistoryFile) save(d downloader, url, downloadedFile string) error {
 		histories = map[string]*history{}
 	}
 
-	h := history{URL: url, Tag: d.releaseTag, Path: downloadedFile}
+	h := history{URL: url, Tag: d.releaseTag, Path: downloadedFile, BinaryName: binaryName}
 	histories[h.key()] = &h
 
 	buf = bytes.NewBuffer(nil)

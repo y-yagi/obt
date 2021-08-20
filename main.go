@@ -167,7 +167,7 @@ func download(stdout, stderr io.Writer) error {
 
 	if len(tmpInstallPath) == 0 {
 		hf := HistoryFile{filename: determineHistoryFilePath()}
-		err = hf.save(downloader, url, file)
+		err = hf.save(downloader, url, file, downloader.binaryName)
 		if err != nil {
 			fmt.Fprintf(stderr, "history save error %v\n", err)
 		}
