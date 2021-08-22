@@ -25,6 +25,7 @@ var (
 	flags           *flag.FlagSet
 	showVersion     bool
 	showInstalled   bool
+	updateAll       bool
 	tmpInstallPath  string
 	defaultPath     string
 	binaryName      string
@@ -49,6 +50,7 @@ func setFlags() {
 	flags = flag.NewFlagSet(cmd, flag.ExitOnError)
 	flags.BoolVar(&showVersion, "v", false, "print version number")
 	flags.BoolVar(&showInstalled, "installed", false, "show installed binaries")
+	flags.BoolVar(&updateAll, "U", false, "update all installed binaries")
 	flags.StringVar(&tmpInstallPath, "p", "", "temporary install path")
 	flags.StringVar(&defaultPath, "s", "", "set default install path")
 	flags.StringVar(&binaryName, "b", "", "binary name")
@@ -111,6 +113,17 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return 0
 	}
 
+	if updateAll {
+		fmt.Fprintf(stdout, "Update all installed binaries to the latest version. Do you want to continue?\nPlease type (y)es or (n)o and then press enter: ")
+		if !askForConfirmation(stdout) {
+			fmt.Fprint(stdout, "canceled.\n")
+			return 0
+		}
+
+		u := updater{stdout: stdout, stderr: stderr, historyFilePath: determineHistoryFilePath(), cachePath: cfg.CachePath}
+		return msg(u.execute(), stderr)
+	}
+
 	return msg(download(stdout, stderr), stderr)
 }
 
@@ -167,7 +180,7 @@ func download(stdout, stderr io.Writer) error {
 
 	if len(tmpInstallPath) == 0 {
 		hf := HistoryFile{filename: determineHistoryFilePath()}
-		err = hf.save(downloader, url, file)
+		err = hf.save(downloader, url, file, downloader.binaryName)
 		if err != nil {
 			fmt.Fprintf(stderr, "history save error %v\n", err)
 		}
@@ -211,7 +224,7 @@ func askForConfirmation(stdout io.Writer) bool {
 	case "n", "no":
 		return false
 	default:
-		fmt.Fprintln(stdout, "Please type (y)es or (n)o and then press enter: ")
+		fmt.Fprintf(stdout, "Please type (y)es or (n)o and then press enter: ")
 		return askForConfirmation(stdout)
 	}
 }

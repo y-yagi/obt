@@ -13,7 +13,7 @@ type HistoryFile struct {
 	filename string
 }
 
-func (hf *HistoryFile) load() (map[string]*history, error) {
+func (hf *HistoryFile) load() (map[string]*History, error) {
 	if !osext.IsExist(hf.filename) {
 		return nil, errors.New("history file doesn't exist")
 	}
@@ -23,7 +23,7 @@ func (hf *HistoryFile) load() (map[string]*history, error) {
 		return nil, err
 	}
 
-	var histories map[string]*history
+	var histories map[string]*History
 
 	buf := bytes.NewBuffer(b)
 	err = gob.NewDecoder(buf).Decode(&histories)
@@ -34,8 +34,8 @@ func (hf *HistoryFile) load() (map[string]*history, error) {
 	return histories, nil
 }
 
-func (hf *HistoryFile) save(d downloader, url, downloadedFile string) error {
-	var histories map[string]*history
+func (hf *HistoryFile) save(d downloader, url, downloadedFile, binaryName string) error {
+	var histories map[string]*History
 	var buf *bytes.Buffer
 	var err error
 
@@ -45,10 +45,10 @@ func (hf *HistoryFile) save(d downloader, url, downloadedFile string) error {
 			return err
 		}
 	} else {
-		histories = map[string]*history{}
+		histories = map[string]*History{}
 	}
 
-	h := history{URL: url, Tag: d.releaseTag, Path: downloadedFile}
+	h := History{URL: url, Tag: d.releaseTag, Path: downloadedFile, BinaryName: binaryName}
 	histories[h.key()] = &h
 
 	buf = bytes.NewBuffer(nil)
