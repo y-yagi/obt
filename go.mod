@@ -1,6 +1,6 @@
 module obt
 
-go 1.16
+go 1.17
 
 require (
 	github.com/BurntSushi/toml v0.4.1 // indirect
@@ -16,3 +16,5 @@ require (
 	github.com/y-yagi/debuglog v0.2.1
 	github.com/y-yagi/goext v0.6.0
 )
+
+require github.com/rivo/uniseg v0.2.0 // indirect
