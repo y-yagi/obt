@@ -19,7 +19,7 @@ import (
 const cmd = "obt"
 
 var (
-	cfg    config
+	cfg    Config
 	logger *debuglog.Logger
 
 	flags           *flag.FlagSet
@@ -35,7 +35,7 @@ var (
 	version = "devel"
 )
 
-type config struct {
+type Config struct {
 	Path            string `toml:"path"`
 	CachePath       string `toml:"cache_path"`
 	HistoryFilePath string `toml:"history_file_path"`
@@ -120,7 +120,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 			return 0
 		}
 
-		u := updater{stdout: stdout, stderr: stderr, historyFilePath: determineHistoryFilePath(), cachePath: cfg.CachePath}
+		u := Updater{stdout: stdout, stderr: stderr, historyFilePath: determineHistoryFilePath(), cachePath: cfg.CachePath}
 		return msg(u.execute(), stderr)
 	}
 
@@ -148,7 +148,7 @@ func download(stdout, stderr io.Writer) error {
 		}
 	}
 
-	downloader := downloader{user: a[len(a)-2], repository: a[len(a)-1], binaryName: binaryName, cachePath: cfg.CachePath, releaseTag: releaseTag}
+	downloader := Downloader{user: a[len(a)-2], repository: a[len(a)-1], binaryName: binaryName, cachePath: cfg.CachePath, releaseTag: releaseTag}
 	err := downloader.findDownloadURL()
 	if err != nil {
 		return err

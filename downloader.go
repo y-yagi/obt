@@ -30,7 +30,7 @@ const (
 	tarXzType
 )
 
-type downloader struct {
+type Downloader struct {
 	user       string
 	repository string
 	url        string
@@ -40,7 +40,7 @@ type downloader struct {
 	releaseTag string
 }
 
-func (d *downloader) findDownloadURL() error {
+func (d *Downloader) findDownloadURL() error {
 	var client *github.Client
 
 	if len(d.cachePath) != 0 {
@@ -103,7 +103,7 @@ func (d *downloader) findDownloadURL() error {
 	return errors.New(msg)
 }
 
-func (d *downloader) isAvailableBinary(assetName string) bool {
+func (d *Downloader) isAvailableBinary(assetName string) bool {
 	if !d.isSupportedFormat(assetName) {
 		return false
 	}
@@ -121,7 +121,7 @@ func (d *downloader) isAvailableBinary(assetName string) bool {
 	return strings.HasPrefix(assetName, prefix) && strings.Contains(assetName, runtime.GOOS) && strings.Contains(assetName, runtime.GOARCH)
 }
 
-func (d *downloader) execute(file string) error {
+func (d *Downloader) execute(file string) error {
 	resp, err := http.Get(d.url)
 	if err != nil {
 		return err
@@ -142,7 +142,7 @@ func (d *downloader) execute(file string) error {
 	return d.downloadBinary(&resp.Body, file)
 }
 
-func (d *downloader) downloadTarGz(body *io.ReadCloser, file string) error {
+func (d *Downloader) downloadTarGz(body *io.ReadCloser, file string) error {
 	archive, err := gzip.NewReader(*body)
 	if err != nil {
 		return nil
@@ -172,7 +172,7 @@ func (d *downloader) downloadTarGz(body *io.ReadCloser, file string) error {
 	return errors.New("can't install released binary. This is a possibility that bug of `obt`. Please report an issue")
 }
 
-func (d *downloader) downloadGzip(body *io.ReadCloser, file string) error {
+func (d *Downloader) downloadGzip(body *io.ReadCloser, file string) error {
 	r, err := gzip.NewReader(*body)
 	if err != nil {
 		return err
@@ -186,7 +186,7 @@ func (d *downloader) downloadGzip(body *io.ReadCloser, file string) error {
 	return d.writeFile(file, bs)
 }
 
-func (d *downloader) downloadZip(body *io.ReadCloser, file string) error {
+func (d *Downloader) downloadZip(body *io.ReadCloser, file string) error {
 	zipdata, err := ioutil.ReadAll(*body)
 	if err != nil {
 		return err
@@ -215,7 +215,7 @@ func (d *downloader) downloadZip(body *io.ReadCloser, file string) error {
 	return errors.New("can't install released binary. This is a possibility that bug of `obt`. Please report an issue")
 }
 
-func (d *downloader) downloadBinary(body *io.ReadCloser, file string) error {
+func (d *Downloader) downloadBinary(body *io.ReadCloser, file string) error {
 	bs, err := ioutil.ReadAll(*body)
 	if err != nil {
 		return err
@@ -224,7 +224,7 @@ func (d *downloader) downloadBinary(body *io.ReadCloser, file string) error {
 	return d.writeFile(file, bs)
 }
 
-func (d *downloader) downloadTarXz(body *io.ReadCloser, file string) error {
+func (d *Downloader) downloadTarXz(body *io.ReadCloser, file string) error {
 	archive, err := xz.NewReader(*body)
 	if err != nil {
 		return nil
@@ -254,7 +254,7 @@ func (d *downloader) downloadTarXz(body *io.ReadCloser, file string) error {
 	return errors.New("can't install released binary. This is a possibility that bug of `obt`. Please report an issue")
 }
 
-func (d *downloader) isSupportedFormat(name string) bool {
+func (d *Downloader) isSupportedFormat(name string) bool {
 	suffixes := []string{"deb", "rpm", "msi", "apk"}
 	for _, v := range suffixes {
 		if strings.HasSuffix(name, v) {
@@ -265,6 +265,6 @@ func (d *downloader) isSupportedFormat(name string) bool {
 	return true
 }
 
-func (d *downloader) writeFile(file string, b []byte) error {
+func (d *Downloader) writeFile(file string, b []byte) error {
 	return ioutil.WriteFile(file, b, 0755)
 }

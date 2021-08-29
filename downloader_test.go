@@ -25,7 +25,7 @@ func TestDownloader_TarGz(t *testing.T) {
 	r := ioutil.NopCloser(strings.NewReader(string(buf)))
 
 	downloaded := tempDir + "/sample"
-	d := downloader{}
+	d := Downloader{}
 	d.downloadTarGz(&r, downloaded)
 
 	if !osext.IsExist(downloaded) {
@@ -58,7 +58,7 @@ func TestDownloader_Gzip(t *testing.T) {
 	r := ioutil.NopCloser(strings.NewReader(string(buf)))
 
 	downloaded := tempDir + "/sample"
-	d := downloader{}
+	d := Downloader{}
 	d.downloadGzip(&r, downloaded)
 
 	if !osext.IsExist(downloaded) {
@@ -92,7 +92,7 @@ func TestDownloader_Zip(t *testing.T) {
 	r := ioutil.NopCloser(strings.NewReader(string(buf)))
 
 	downloaded := tempDir + "/sample"
-	d := downloader{}
+	d := Downloader{}
 	if err := d.downloadZip(&r, downloaded); err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +127,7 @@ func TestDownloader_TarXz(t *testing.T) {
 	r := ioutil.NopCloser(strings.NewReader(string(buf)))
 
 	downloaded := tempDir + "/sample"
-	d := downloader{}
+	d := Downloader{}
 	d.downloadTarXz(&r, downloaded)
 
 	if !osext.IsExist(downloaded) {
@@ -159,7 +159,7 @@ func TestIsAvailableBinary(t *testing.T) {
 		{"golangci-lint-1.23.8-" + osAndArch + ".apk", false},
 	}
 
-	d := downloader{binaryName: "golangci-lint"}
+	d := Downloader{binaryName: "golangci-lint"}
 	for _, tt := range tests {
 		got := d.isAvailableBinary(tt.in)
 		if tt.want != got {

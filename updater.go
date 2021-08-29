@@ -7,14 +7,14 @@ import (
 	"sync"
 )
 
-type updater struct {
+type Updater struct {
 	stdout          io.Writer
 	stderr          io.Writer
 	historyFilePath string
 	cachePath       string
 }
 
-func (u *updater) execute() error {
+func (u *Updater) execute() error {
 	hf := HistoryFile{filename: u.historyFilePath}
 	histories, err := hf.load()
 	if err != nil {
@@ -29,7 +29,7 @@ func (u *updater) execute() error {
 			defer wg.Done()
 
 			parsedURL := strings.Split(h.URL, "/")
-			downloader := downloader{user: parsedURL[len(parsedURL)-2], repository: parsedURL[len(parsedURL)-1], binaryName: h.BinaryName, cachePath: u.cachePath, releaseTag: ""}
+			downloader := Downloader{user: parsedURL[len(parsedURL)-2], repository: parsedURL[len(parsedURL)-1], binaryName: h.BinaryName, cachePath: u.cachePath, releaseTag: ""}
 
 			err := downloader.findDownloadURL()
 			if err != nil {
