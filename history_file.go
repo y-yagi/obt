@@ -56,5 +56,5 @@ func (hf *HistoryFile) save(d Downloader, url, downloadedFile, binaryName string
 		return err
 	}
 
-	return ioutil.WriteFile(hf.filename, buf.Bytes(), 0644)
+	return ioutil.WriteFile(hf.filename, buf.Bytes(), 0600)
 }
