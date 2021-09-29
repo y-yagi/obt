@@ -82,15 +82,16 @@ func (d *Downloader) findDownloadURL() error {
 
 		if d.isAvailableBinary(*asset.Name) {
 			d.url = *asset.BrowserDownloadURL
-			if strings.HasSuffix(*asset.Name, "tar.gz") {
+			switch {
+			case strings.HasSuffix(*asset.Name, "tar.gz"):
 				d.fType = tarGzType
-			} else if strings.HasSuffix(*asset.Name, "gzip") {
+			case strings.HasSuffix(*asset.Name, "gzip"):
 				d.fType = gzipType
-			} else if strings.HasSuffix(*asset.Name, "zip") {
+			case strings.HasSuffix(*asset.Name, "zip"):
 				d.fType = zipType
-			} else if strings.HasSuffix(*asset.Name, "tar.xz") {
+			case strings.HasSuffix(*asset.Name, "tar.xz"):
 				d.fType = tarXzType
-			} else {
+			default:
 				d.fType = binary
 			}
 
