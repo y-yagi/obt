@@ -91,6 +91,8 @@ func (d *Downloader) findDownloadURL() error {
 				d.fType = zipType
 			case strings.HasSuffix(*asset.Name, "tar.xz"):
 				d.fType = tarXzType
+			case strings.HasSuffix(*asset.Name, "gz"):
+				d.fType = gzipType
 			default:
 				d.fType = binary
 			}

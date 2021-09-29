@@ -157,6 +157,7 @@ func TestIsAvailableBinary(t *testing.T) {
 		{"golangci-lint-1.23.8-" + osAndArch + ".gzip", true},
 		{"golangci-lint-1.23.8-" + osAndArch + ".zip", true},
 		{"golangci-lint-1.23.8-" + osAndArch + ".apk", false},
+		{"golangci-lint-1.23.8-" + osAndArch + ".gz", true},
 	}
 
 	d := Downloader{binaryName: "golangci-lint"}
