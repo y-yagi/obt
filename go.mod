@@ -3,7 +3,6 @@ module obt
 go 1.17
 
 require (
-	github.com/BurntSushi/toml v0.4.1 // indirect
 	github.com/google/btree v1.0.1 // indirect
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-querystring v1.1.0 // indirect
@@ -12,9 +11,12 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/ulikunitz/xz v0.5.10
-	github.com/y-yagi/configure v0.2.0
+	github.com/y-yagi/configure v0.3.0
 	github.com/y-yagi/debuglog v0.2.1
 	github.com/y-yagi/goext v0.6.0
 )
 
-require github.com/rivo/uniseg v0.2.0 // indirect
+require (
+	github.com/pelletier/go-toml v1.8.1 // indirect
+	github.com/rivo/uniseg v0.2.0 // indirect
+)
