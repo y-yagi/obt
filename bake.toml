@@ -2,7 +2,7 @@
 dependencies = ["build"]
 
 [test]
-command = ["go", "test", "-v", "./..."]
+command = ["docker-compose", "run", "unit"]
 
 [clean]
 command = ["go", "clean", "-testcache"]
