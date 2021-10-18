@@ -2,7 +2,7 @@
 dependencies = ["build"]
 
 [test]
-command = ["docker-compose", "run", "unit"]
+command = ["docker-compose", "up"]
 
 [clean]
 command = ["go", "clean", "-testcache"]
