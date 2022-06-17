@@ -25,7 +25,7 @@ func TestDownloader_TarGz(t *testing.T) {
 	r := ioutil.NopCloser(strings.NewReader(string(buf)))
 
 	downloaded := tempDir + "/sample"
-	d := Downloader{}
+	d := Downloader{binaryName: "sample.txt"}
 	d.downloadTarGz(&r, downloaded)
 
 	if !osext.IsExist(downloaded) {
@@ -77,7 +77,6 @@ func TestDownloader_Gzip(t *testing.T) {
 }
 
 func TestDownloader_Zip(t *testing.T) {
-	binaryName = "sample.txt"
 	tempDir, err := ioutil.TempDir("", "obttest")
 	if err != nil {
 		t.Fatal(err)
@@ -92,7 +91,7 @@ func TestDownloader_Zip(t *testing.T) {
 	r := ioutil.NopCloser(strings.NewReader(string(buf)))
 
 	downloaded := tempDir + "/sample"
-	d := Downloader{}
+	d := Downloader{binaryName: "sample.txt"}
 	if err := d.downloadZip(&r, downloaded); err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +126,7 @@ func TestDownloader_TarXz(t *testing.T) {
 	r := ioutil.NopCloser(strings.NewReader(string(buf)))
 
 	downloaded := tempDir + "/sample"
-	d := Downloader{}
+	d := Downloader{binaryName: "sample.txt"}
 	d.downloadTarXz(&r, downloaded)
 
 	if !osext.IsExist(downloaded) {

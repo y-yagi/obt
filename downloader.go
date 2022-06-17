@@ -11,6 +11,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -162,7 +163,7 @@ func (d *Downloader) downloadTarGz(body *io.ReadCloser, file string) error {
 			return nil
 		}
 
-		if strings.HasSuffix(hdr.Name, d.binaryName) {
+		if filepath.Base(hdr.Name) == d.binaryName {
 			bs, err := ioutil.ReadAll(tr)
 			if err != nil {
 				return nil
@@ -201,7 +202,7 @@ func (d *Downloader) downloadZip(body *io.ReadCloser, file string) error {
 	}
 
 	for _, f := range z.File {
-		if strings.HasSuffix(f.Name, d.binaryName) {
+		if filepath.Base(f.Name) == d.binaryName {
 			r, err := f.Open()
 			if err != nil {
 				return err
@@ -244,7 +245,7 @@ func (d *Downloader) downloadTarXz(body *io.ReadCloser, file string) error {
 			return nil
 		}
 
-		if strings.HasSuffix(hdr.Name, d.binaryName) {
+		if filepath.Base(hdr.Name) == d.binaryName {
 			bs, err := ioutil.ReadAll(tr)
 			if err != nil {
 				return nil
