@@ -9,8 +9,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -164,7 +164,7 @@ func (d *Downloader) downloadTarGz(body *io.ReadCloser, file string) error {
 		}
 
 		if filepath.Base(hdr.Name) == d.binaryName {
-			bs, err := ioutil.ReadAll(tr)
+			bs, err := io.ReadAll(tr)
 			if err != nil {
 				return nil
 			}
@@ -182,7 +182,7 @@ func (d *Downloader) downloadGzip(body *io.ReadCloser, file string) error {
 		return err
 	}
 
-	bs, err := ioutil.ReadAll(r)
+	bs, err := io.ReadAll(r)
 	if err != nil {
 		return err
 	}
@@ -191,7 +191,7 @@ func (d *Downloader) downloadGzip(body *io.ReadCloser, file string) error {
 }
 
 func (d *Downloader) downloadZip(body *io.ReadCloser, file string) error {
-	zipdata, err := ioutil.ReadAll(*body)
+	zipdata, err := io.ReadAll(*body)
 	if err != nil {
 		return err
 	}
@@ -208,7 +208,7 @@ func (d *Downloader) downloadZip(body *io.ReadCloser, file string) error {
 				return err
 			}
 
-			b, err := ioutil.ReadAll(r)
+			b, err := io.ReadAll(r)
 			if err != nil {
 				return err
 			}
@@ -220,7 +220,7 @@ func (d *Downloader) downloadZip(body *io.ReadCloser, file string) error {
 }
 
 func (d *Downloader) downloadBinary(body *io.ReadCloser, file string) error {
-	bs, err := ioutil.ReadAll(*body)
+	bs, err := io.ReadAll(*body)
 	if err != nil {
 		return err
 	}
@@ -246,7 +246,7 @@ func (d *Downloader) downloadTarXz(body *io.ReadCloser, file string) error {
 		}
 
 		if filepath.Base(hdr.Name) == d.binaryName {
-			bs, err := ioutil.ReadAll(tr)
+			bs, err := io.ReadAll(tr)
 			if err != nil {
 				return nil
 			}
@@ -270,5 +270,5 @@ func (d *Downloader) isSupportedFormat(name string) bool {
 }
 
 func (d *Downloader) writeFile(file string, b []byte) error {
-	return ioutil.WriteFile(file, b, 0755)
+	return os.WriteFile(file, b, 0755)
 }

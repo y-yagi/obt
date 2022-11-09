@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -13,7 +12,7 @@ import (
 func TestDownloadTarGz(t *testing.T) {
 	setFlags()
 	origiDir, _ := os.Getwd()
-	tempDir, err := ioutil.TempDir("", "obttest")
+	tempDir, err := os.MkdirTemp("", "obttest")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -32,7 +31,7 @@ func TestDownloadTarGz(t *testing.T) {
 func TestDownloadBinary(t *testing.T) {
 	setFlags()
 	origiDir, _ := os.Getwd()
-	tempDir, err := ioutil.TempDir("", "obttest")
+	tempDir, err := os.MkdirTemp("", "obttest")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -52,7 +51,7 @@ func TestDownloadBinary(t *testing.T) {
 func TestDownloadRustPackage(t *testing.T) {
 	setFlags()
 	origiDir, _ := os.Getwd()
-	tempDir, err := ioutil.TempDir("", "obttest")
+	tempDir, err := os.MkdirTemp("", "obttest")
 	if err != nil {
 		t.Fatal(err)
 	}
