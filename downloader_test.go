@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"runtime"
 	"strings"
@@ -11,18 +11,18 @@ import (
 )
 
 func TestDownloader_TarGz(t *testing.T) {
-	tempDir, err := ioutil.TempDir("", "obttest")
+	tempDir, err := os.MkdirTemp("", "obttest")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(tempDir)
 
-	buf, err := ioutil.ReadFile("testdata/sample.tar.gz")
+	buf, err := os.ReadFile("testdata/sample.tar.gz")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	r := ioutil.NopCloser(strings.NewReader(string(buf)))
+	r := io.NopCloser(strings.NewReader(string(buf)))
 
 	downloaded := tempDir + "/sample"
 	d := Downloader{binaryName: "sample.txt"}
@@ -32,7 +32,7 @@ func TestDownloader_TarGz(t *testing.T) {
 		t.Fatalf("file download failed")
 	}
 
-	buf, err = ioutil.ReadFile(downloaded)
+	buf, err = os.ReadFile(downloaded)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,18 +44,18 @@ func TestDownloader_TarGz(t *testing.T) {
 }
 
 func TestDownloader_Gzip(t *testing.T) {
-	tempDir, err := ioutil.TempDir("", "obttest")
+	tempDir, err := os.MkdirTemp("", "obttest")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(tempDir)
 
-	buf, err := ioutil.ReadFile("testdata/sample.gzip")
+	buf, err := os.ReadFile("testdata/sample.gzip")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	r := ioutil.NopCloser(strings.NewReader(string(buf)))
+	r := io.NopCloser(strings.NewReader(string(buf)))
 
 	downloaded := tempDir + "/sample"
 	d := Downloader{}
@@ -65,7 +65,7 @@ func TestDownloader_Gzip(t *testing.T) {
 		t.Fatalf("file download failed")
 	}
 
-	buf, err = ioutil.ReadFile(downloaded)
+	buf, err = os.ReadFile(downloaded)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,18 +77,18 @@ func TestDownloader_Gzip(t *testing.T) {
 }
 
 func TestDownloader_Zip(t *testing.T) {
-	tempDir, err := ioutil.TempDir("", "obttest")
+	tempDir, err := os.MkdirTemp("", "obttest")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(tempDir)
 
-	buf, err := ioutil.ReadFile("testdata/sample.zip")
+	buf, err := os.ReadFile("testdata/sample.zip")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	r := ioutil.NopCloser(strings.NewReader(string(buf)))
+	r := io.NopCloser(strings.NewReader(string(buf)))
 
 	downloaded := tempDir + "/sample"
 	d := Downloader{binaryName: "sample.txt"}
@@ -100,7 +100,7 @@ func TestDownloader_Zip(t *testing.T) {
 		t.Fatalf("file download failed")
 	}
 
-	buf, err = ioutil.ReadFile(downloaded)
+	buf, err = os.ReadFile(downloaded)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,18 +112,18 @@ func TestDownloader_Zip(t *testing.T) {
 }
 
 func TestDownloader_TarXz(t *testing.T) {
-	tempDir, err := ioutil.TempDir("", "obttest")
+	tempDir, err := os.MkdirTemp("", "obttest")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer os.RemoveAll(tempDir)
 
-	buf, err := ioutil.ReadFile("testdata/sample.tar.xz")
+	buf, err := os.ReadFile("testdata/sample.tar.xz")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	r := ioutil.NopCloser(strings.NewReader(string(buf)))
+	r := io.NopCloser(strings.NewReader(string(buf)))
 
 	downloaded := tempDir + "/sample"
 	d := Downloader{binaryName: "sample.txt"}
@@ -133,7 +133,7 @@ func TestDownloader_TarXz(t *testing.T) {
 		t.Fatalf("file download failed")
 	}
 
-	buf, err = ioutil.ReadFile(downloaded)
+	buf, err = os.ReadFile(downloaded)
 	if err != nil {
 		t.Fatal(err)
 	}

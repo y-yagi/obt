@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"errors"
-	"io/ioutil"
+	"os"
 
 	"github.com/y-yagi/goext/osext"
 )
@@ -18,7 +18,7 @@ func (hf *HistoryFile) load() (map[string]*History, error) {
 		return nil, errors.New("history file doesn't exist")
 	}
 
-	b, err := ioutil.ReadFile(hf.filename)
+	b, err := os.ReadFile(hf.filename)
 	if err != nil {
 		return nil, err
 	}
@@ -56,5 +56,5 @@ func (hf *HistoryFile) save(d Downloader, url, downloadedFile, binaryName string
 		return err
 	}
 
-	return ioutil.WriteFile(hf.filename, buf.Bytes(), 0600)
+	return os.WriteFile(hf.filename, buf.Bytes(), 0600)
 }
