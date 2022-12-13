@@ -10,7 +10,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
-	github.com/ulikunitz/xz v0.5.10
+	github.com/ulikunitz/xz v0.5.11
 	github.com/y-yagi/configure v0.3.0
 	github.com/y-yagi/debuglog v0.2.1
 	github.com/y-yagi/goext v0.6.0
