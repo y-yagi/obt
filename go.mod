@@ -1,4 +1,4 @@
-module obt
+module github.com/y-yagi/obt
 
 go 1.19
 
