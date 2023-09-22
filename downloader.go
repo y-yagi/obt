@@ -132,18 +132,22 @@ func (d *Downloader) execute(file string) error {
 	}
 	defer resp.Body.Close()
 
+	return d.download(&resp.Body, file)
+}
+
+func (d *Downloader) download(body *io.ReadCloser, file string) error {
 	switch d.fType {
 	case tarGzType:
-		return d.downloadTarGz(&resp.Body, file)
+		return d.downloadTarGz(body, file)
 	case gzipType:
-		return d.downloadGzip(&resp.Body, file)
+		return d.downloadGzip(body, file)
 	case zipType:
-		return d.downloadZip(&resp.Body, file)
+		return d.downloadZip(body, file)
 	case tarXzType:
-		return d.downloadTarXz(&resp.Body, file)
+		return d.downloadTarXz(body, file)
 	}
 
-	return d.downloadBinary(&resp.Body, file)
+	return d.downloadBinary(body, file)
 }
 
 func (d *Downloader) downloadTarGz(body *io.ReadCloser, file string) error {
