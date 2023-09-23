@@ -18,6 +18,7 @@ import (
 	"github.com/google/go-github/github"
 	"github.com/gregjones/httpcache"
 	"github.com/gregjones/httpcache/diskcache"
+	"github.com/h2non/filetype"
 	"github.com/ulikunitz/xz"
 )
 
@@ -132,18 +133,38 @@ func (d *Downloader) execute(file string) error {
 	}
 	defer resp.Body.Close()
 
-	switch d.fType {
-	case tarGzType:
-		return d.downloadTarGz(&resp.Body, file)
-	case gzipType:
-		return d.downloadGzip(&resp.Body, file)
-	case zipType:
-		return d.downloadZip(&resp.Body, file)
-	case tarXzType:
-		return d.downloadTarXz(&resp.Body, file)
+	if err = d.download(&resp.Body, file); err != nil {
+		return err
 	}
 
-	return d.downloadBinary(&resp.Body, file)
+	fileIsBinary, err := d.isBinary(file)
+	if err != nil {
+		return err
+	}
+
+	if !fileIsBinary {
+		if err := os.Remove(file); err != nil {
+			return err
+		}
+		return errors.New("downloaded file is not binary. This is a possibility that bug of `obt`. Please report an issue")
+	}
+
+	return nil
+}
+
+func (d *Downloader) download(body *io.ReadCloser, file string) error {
+	switch d.fType {
+	case tarGzType:
+		return d.downloadTarGz(body, file)
+	case gzipType:
+		return d.downloadGzip(body, file)
+	case zipType:
+		return d.downloadZip(body, file)
+	case tarXzType:
+		return d.downloadTarXz(body, file)
+	}
+
+	return d.downloadBinary(body, file)
 }
 
 func (d *Downloader) downloadTarGz(body *io.ReadCloser, file string) error {
@@ -271,4 +292,24 @@ func (d *Downloader) isSupportedFormat(name string) bool {
 
 func (d *Downloader) writeFile(file string, b []byte) error {
 	return os.WriteFile(file, b, 0755)
+}
+
+func (d *Downloader) isBinary(file string) (bool, error) {
+	f, err := os.Open(file)
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+
+	// We only have to pass the file header = first 261 bytes
+	head := make([]byte, 261)
+	f.Read(head)
+
+	kind, err := filetype.Match(head)
+	if err != nil {
+		return false, err
+	}
+
+	res := kind.Extension == "elf"
+	return res, nil
 }

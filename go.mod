@@ -16,6 +16,8 @@ require (
 	github.com/y-yagi/goext v0.6.0
 )
 
+require github.com/h2non/filetype v1.1.3
+
 require (
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
