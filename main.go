@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/tw"
 	"github.com/y-yagi/configure"
 	"github.com/y-yagi/debuglog"
 	"github.com/y-yagi/goext/osext"
@@ -236,13 +237,19 @@ func showInstalledBinaries(stdout io.Writer) error {
 		return err
 	}
 
-	table := tablewriter.NewWriter(stdout)
-	table.SetHeader([]string{"URL", "TAG", "PATH"})
+	table := tablewriter.NewTable(stdout, tablewriter.WithSymbols(tw.NewSymbols(tw.StyleASCII)))
+	table.Header("URL", "TAG", "PATH")
 
 	for _, h := range histories {
-		table.Append([]string{h.URL, h.Tag, h.Path})
+		err := table.Append([]string{h.URL, h.Tag, h.Path})
+		if err != nil {
+			return err
+		}
 	}
 
-	table.Render()
+	err = table.Render()
+	if err != nil {
+		return err
+	}
 	return nil
 }
