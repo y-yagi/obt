@@ -1,6 +1,6 @@
 module github.com/y-yagi/obt
 
-go 1.23
+go 1.26
 
 require (
 	github.com/google/btree v1.1.2 // indirect

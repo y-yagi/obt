@@ -113,14 +113,15 @@ func (d *Downloader) isAvailableBinary(assetName string) bool {
 		return false
 	}
 
-	assetName = strings.Replace(assetName, "-", "_", -1)
-	prefix := strings.Replace(d.binaryName, "-", "_", -1)
+	assetName = strings.ReplaceAll(assetName, "-", "_")
+	prefix := strings.ReplaceAll(d.binaryName, "-", "_")
 	assetName = strings.ToLower(assetName)
-	if runtime.GOARCH == "amd64" {
-		assetName = strings.Replace(assetName, "x86_64", "amd64", -1)
-		assetName = strings.Replace(assetName, "64bit", "amd64", -1)
-	} else if runtime.GOARCH == "386" {
-		assetName = strings.Replace(assetName, "x86", "386", -1)
+	switch runtime.GOARCH {
+	case "amd64":
+		assetName = strings.ReplaceAll(assetName, "x86_64", "amd64")
+		assetName = strings.ReplaceAll(assetName, "64bit", "amd64")
+	case "386":
+		assetName = strings.ReplaceAll(assetName, "x86", "386")
 	}
 
 	return strings.HasPrefix(assetName, prefix) && strings.Contains(assetName, runtime.GOOS) && strings.Contains(assetName, runtime.GOARCH)
