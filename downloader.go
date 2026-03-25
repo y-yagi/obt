@@ -116,10 +116,11 @@ func (d *Downloader) isAvailableBinary(assetName string) bool {
 	assetName = strings.ReplaceAll(assetName, "-", "_")
 	prefix := strings.ReplaceAll(d.binaryName, "-", "_")
 	assetName = strings.ToLower(assetName)
-	if runtime.GOARCH == "amd64" {
+	switch runtime.GOARCH {
+	case "amd64":
 		assetName = strings.ReplaceAll(assetName, "x86_64", "amd64")
 		assetName = strings.ReplaceAll(assetName, "64bit", "amd64")
-	} else if runtime.GOARCH == "386" {
+	case "386":
 		assetName = strings.ReplaceAll(assetName, "x86", "386")
 	}
 
