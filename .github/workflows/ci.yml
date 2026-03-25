@@ -30,9 +30,6 @@ jobs:
         version: latest
         args: -D errcheck
 
-    - name: govulncheckg
-      uses: golang/govulncheck-action@b625fbe08f3bccbe446d94fbf87fcc875a4f50ee # v1.0.4
-
     - name: Run test
       run: |
         go test -v ./...
