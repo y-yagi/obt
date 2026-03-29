@@ -30,6 +30,7 @@ const (
 	gzipType
 	zipType
 	tarXzType
+	xzType
 )
 
 type Downloader struct {
@@ -93,6 +94,8 @@ func (d *Downloader) findDownloadURL() error {
 				d.fType = zipType
 			case strings.HasSuffix(*asset.Name, "tar.xz"):
 				d.fType = tarXzType
+			case strings.HasSuffix(*asset.Name, "xz"):
+				d.fType = xzType
 			case strings.HasSuffix(*asset.Name, "gz"):
 				d.fType = gzipType
 			default:
@@ -163,6 +166,8 @@ func (d *Downloader) download(body *io.ReadCloser, file string) error {
 		return d.downloadZip(body, file)
 	case tarXzType:
 		return d.downloadTarXz(body, file)
+	case xzType:
+		return d.downloadXz(body, file)
 	}
 
 	return d.downloadBinary(body, file)
@@ -278,6 +283,20 @@ func (d *Downloader) downloadTarXz(body *io.ReadCloser, file string) error {
 	}
 
 	return errors.New("can't install released binary. This is a possibility that bug of `obt`. Please report an issue")
+}
+
+func (d *Downloader) downloadXz(body *io.ReadCloser, file string) error {
+	r, err := xz.NewReader(*body)
+	if err != nil {
+		return err
+	}
+
+	bs, err := io.ReadAll(r)
+	if err != nil {
+		return err
+	}
+
+	return d.writeFile(file, bs)
 }
 
 func (d *Downloader) isSupportedFormat(name string) bool {
